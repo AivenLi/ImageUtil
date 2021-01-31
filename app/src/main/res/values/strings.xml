@@ -11,6 +11,11 @@
     <string name="dia_choose_img_title">选取图片</string>
     <string name="dia_choose_img_photos">系统相册</string>
     <string name="dia_choose_img_camera">相机拍照</string>
+    <string name="add_image_prompt">点击添加图片</string>
+    <string name="clarity">清晰度</string>
+    <string name="contrast_ratio">对比度</string>
+    <string name="saturation">饱和度</string>
+    <string name="save_image">保存图片</string>
     <string name="img_is_null">请先选择图片</string>
     <string name="yes">确定</string>
     <string name="cancel">取消</string>

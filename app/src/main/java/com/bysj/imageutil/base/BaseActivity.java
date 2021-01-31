@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.os.Message;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bysj.imageutil.ui.components.dialog.DialogPrompt;
 import com.bysj.imageutil.ui.components.dialog.DialogPromptListener;
 import com.bysj.imageutil.util.ActivityManageHelper;
+import com.bysj.imageutil.util.WeakHandler;
 
 /**
  * Activity基类
@@ -77,11 +79,33 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    protected abstract void onHandleMessage(final Message msg);
     protected abstract int initLayout();
     protected abstract void initView();
     protected abstract void setViewOnClick();
     protected <T extends View> T findView(int id) {
         return (T) findViewById(id);
+    }
+
+    /**
+     * Send a Message
+     * */
+    protected void sendMessage(int what, Object obj) {
+
+        Message msg = new Message();
+        msg.what = what;
+        msg.obj  = obj;
+        handler.sendMessage(msg);
+    }
+
+    protected void sendMessage(Message msg) {
+
+        handler.sendMessage(msg);
+    }
+
+    protected void sendEmptyMessage(int what) {
+
+        handler.sendEmptyMessage(what);
     }
 
     /**
@@ -138,5 +162,17 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         Toast.makeText(mContext, str, Toast.LENGTH_SHORT).show();
     }
+
+    /**
+     * Avoid memory leaks
+     * WeakHandler
+     */
+    public WeakHandler handler = new WeakHandler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            onHandleMessage(msg);
+        }
+    };
 
 }

@@ -15,7 +15,6 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.bysj.imageutil.R;
-import com.bysj.imageutil.ui.components.dialog.DialogPrompt;
 import com.bysj.imageutil.util.ActivityManageHelper;
 import com.bysj.imageutil.util.LogCat;
 import com.tbruyelle.rxpermissions2.RxPermissions;

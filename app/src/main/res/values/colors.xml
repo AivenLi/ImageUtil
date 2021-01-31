@@ -8,4 +8,5 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="red">#ffd81e06</color>
+    <color name="add_image_prompt">#ffffffff</color>
 </resources>

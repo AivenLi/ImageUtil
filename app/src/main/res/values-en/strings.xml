@@ -11,7 +11,12 @@
     <string name="dia_choose_img_title">Select picture</string>
     <string name="dia_choose_img_photos">System Album</string>
     <string name="dia_choose_img_camera">Camera photo</string>
+    <string name="add_image_prompt">Click to add picture</string>
     <string name="img_is_null">Please select a picture first</string>
+    <string name="clarity">Clarity</string>
+    <string name="contrast_ratio">Contrast ratio</string>
+    <string name="saturation">Saturation ratio</string>
+    <string name="save_image">Save</string>
     <string name="yes">Yes</string>
     <string name="cancel">Cancel</string>
 </resources>
