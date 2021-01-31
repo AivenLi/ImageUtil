@@ -2,4 +2,16 @@
     <string name="app_name">ImageUtil</string>
 
     <string name="grayscale">灰度处理</string>
+    <string name="splash_text_title">图片增强APP</string>
+    <string name="exit_app">再按一次退出程序</string>
+    <string name="copyright">版权所有 © 2020 – 2021 YourName</string>
+
+    <string name="app_perimision_prompt">请打开所需的相关权限，否则您无法正常使用本应用</string>
+    <string name="dia_error">错误提示</string>
+    <string name="dia_choose_img_title">选取图片</string>
+    <string name="dia_choose_img_photos">系统相册</string>
+    <string name="dia_choose_img_camera">相机拍照</string>
+    <string name="img_is_null">请先选择图片</string>
+    <string name="yes">确定</string>
+    <string name="cancel">取消</string>
 </resources>

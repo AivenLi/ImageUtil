@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+         配置相机拍照的路径。
+         Android8.0之后需要这么做，
+         因为官方认为直接返回Uri不安全
+    -->
+    <!--
+         1.<root-path/> 代表设备的根目录new File("/");
+         2.<files-path/> 代表context.getFilesDir()
+         3.<cache-path/> 代表context.getCacheDir()
+         4.<external-path/> 代表Environment.getExternalStorageDirectory()
+         5.<external-files-path>代表context.getExternalFilesDirs()
+         6.<external-cache-path>代表getExternalCacheDirs()
+    -->
+    <paths>
+        <cache-path path="" name="camera_photos" />
+    </paths>
+</resources>

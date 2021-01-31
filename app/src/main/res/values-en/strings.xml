@@ -2,4 +2,16 @@
     <string name="app_name">ImageUtil</string>
 
     <string name="grayscale">Grayscale</string>
+    <string name="splash_text_title">Picture enhancement app</string>
+    <string name="exit_app">Press again to exit the program</string>
+    <string name="copyright">Copyright © 2020 – 2021 YourName. All Rights Reserved.</string>
+
+    <string name="app_perimision_prompt">Please turn on the required permissions, otherwise you will not be able to use this application normally</string>
+    <string name="dia_error">Error</string>
+    <string name="dia_choose_img_title">Select picture</string>
+    <string name="dia_choose_img_photos">System Album</string>
+    <string name="dia_choose_img_camera">Camera photo</string>
+    <string name="img_is_null">Please select a picture first</string>
+    <string name="yes">Yes</string>
+    <string name="cancel">Cancel</string>
 </resources>

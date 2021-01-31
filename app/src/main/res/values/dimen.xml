@@ -2,5 +2,11 @@
 <resources>
 
     <dimen name="testGra">10sp</dimen>
+    <dimen name="copyright">14sp</dimen>
+    <dimen name="splash_text_title">16sp</dimen>
+    <dimen name="dialog_title">18sp</dimen>
+    <dimen name="dialog_content">16sp</dimen>
+    <dimen name="dialog_yes_cancel">14sp</dimen>
+
 
 </resources>
