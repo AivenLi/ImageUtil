@@ -1,4 +1,5 @@
-include ':opencv'
+include ':opencv450'
+//include ':opencv'
 include ':app'
-project(':opencv').projectDir = new File(rootDir, 'OpenCV-android-sdk/sdk/')
+//project(':opencv').projectDir = new File(rootDir, 'OpenCV-android-sdk/sdk/')
 rootProject.name = "ImageUtil"

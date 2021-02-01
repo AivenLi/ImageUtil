@@ -31,11 +31,8 @@ import com.bysj.imageutil.util.GlideUtil;
 import com.bysj.imageutil.util.HandleKeys;
 import com.bysj.imageutil.util.IntentKeys;
 import com.bysj.imageutil.util.LogCat;
+import com.bysj.opencv450.OpenCV;
 
-import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.util.Objects;
@@ -62,15 +59,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     private TextView            mTvSave;
 
     /** 再按一次退出程序 */
-    private long                exitTime        = 0;
+    private long                exitTime            = 0;
     /** 选取图片后图片副本的固定路径 */
-    private String              imagePath     = null;
+    private String              imgConstantPath     = null;
     /** 相机拍照后的图片文件名 */
-    private String              imageFilePath = null;
-    /** 相册选择的图片的路径 */
-    private String              photosPath      = null;
-    /** 相机拍照后的图片文件 */
-    private File                captureFile     = null;
+    private String              imgChoosePath       = null;
     /** 清晰度的当前值 */
     private float               clarityValue;
     /** 对比度的当前值 */
@@ -83,16 +76,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
         super.onCreate(savedInstanceState);
         /** 加载opencv动态库 */
-        boolean opencv = OpenCVLoader.initDebug();
-        if ( opencv ) {
-
-            LogCat.d(TAG, "Loaded OpenCV success");
-        } else {
-
-            LogCat.d(TAG, "Loaded OpenCV failure");
-        }
         mDialog = new DialogPrompt(mContext);
-        capturePath = mContext.getCacheDir().getPath() + "/";
+        imgConstantPath = mContext.getCacheDir().getPath() + "/";
     }
 
     @Override
@@ -158,8 +143,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 if ( !TextUtils.isEmpty(path) ) {
 
                     final File file = new File(path);
-                    isCapture = false;
-                    FileUtils.copyFile(file.getPath(), capturePath + System.currentTimeMillis() + "_capture.jpg", new FileUtils.CopyFileListener() {
+                    FileUtils.copyFile(file.getPath(), imgConstantPath + System.currentTimeMillis() + "_capture.jpg", new FileUtils.CopyFileListener() {
                         @Override
                         public void success(String filePath) {
 
@@ -173,8 +157,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                             sendMessage(HandleKeys.COPY_FILE_FAILURE, error);
                         }
                     });
-                    mImgSource.setImageURI(data.getData());
-                    setShowImage(true);
                 }
             }
             /**
@@ -182,13 +164,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
              */
             if ( requestCode == IntentKeys.MAIN_TO_CAMERA ) {
 
-                isCapture = true;
-                GlideUtil.clearDiskCache(mContext);
-                Glide.with(mImgSource.getContext())
-                        .load(captureFilePath)
-                        .placeholder(android.R.color.darker_gray)
-                        .into(mImgSource);
-                clearCacheCapture(captureFilePath);
                 setShowImage(true);
             }
         }
@@ -200,8 +175,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         int what = msg.what;
         if ( what == HandleKeys.COPY_FILE_SUCCESS ) {
 
-            photosPath = (String)msg.obj;
-            LogCat.d(TAG + "获取成功", photosPath);
+            imgChoosePath = (String)msg.obj;
+            LogCat.d(TAG + "获取成功", imgChoosePath);
+            setShowImage(true);
         } else if ( what == HandleKeys.COPY_FILE_FAILURE ) {
 
             LogCat.d(TAG + "获取失败", (String)msg.obj);
@@ -238,7 +214,25 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             mImgTarget.setVisibility(View.VISIBLE);
             mLytController.setVisibility(View.VISIBLE);
             mLytAddImgPrompt.setVisibility(View.GONE);
+            loadImage();
         }
+    }
+
+    /**
+     * 将图片显示到UI
+     */
+    private void loadImage() {
+
+        GlideUtil.clearDiskCache(mContext);
+        Glide.with(mImgSource.getContext())
+                .load(imgChoosePath)
+                .placeholder(android.R.color.darker_gray)
+                .into(mImgSource);
+        Glide.with(mImgTarget.getContext())
+                .load(imgChoosePath)
+                .placeholder(android.R.color.darker_gray)
+                .into(mImgTarget);
+        clearCacheCapture(imgChoosePath);
     }
 
     /**
@@ -294,12 +288,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
                         //调用系统相机的意图
                         Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        captureFilePath = capturePath + System.currentTimeMillis() + "_capture.jpg";
-                        LogCat.d(TAG, captureFilePath);
+                        imgChoosePath = imgConstantPath + System.currentTimeMillis() + "_capture.jpg";
 
-                        captureFile = new File(captureFilePath);
+                        File file = new File(imgChoosePath);
 
-                        Uri uri = FileProvider.getUriForFile(mContext, "com.bysj.imageutil.fileprovider", captureFile);
+                        Uri uri = FileProvider.getUriForFile(mContext, "com.bysj.imageutil.fileprovider", file);
                         takePhotoIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
                         startActivityForResult(takePhotoIntent, IntentKeys.MAIN_TO_CAMERA);
@@ -308,10 +301,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                     @Override
                     public void cancel() {
 
-                        captureFilePath = capturePath + System.currentTimeMillis() + "_capture.jpg";
-                        LogCat.d(TAG, captureFilePath);
+                        imgChoosePath = imgConstantPath + System.currentTimeMillis() + "_capture.jpg";
 
-                        captureFile = new File(captureFilePath);
+                        File file = new File(imgChoosePath);
                         //调用系统图库的意图
                         /*
                         Intent choosePicIntent = new Intent(Intent.ACTION_GET_CONTENT, null);
@@ -324,7 +316,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                             //如果大于等于7.0使用
                             Uri uriForFile= FileProvider.getUriForFile(mContext,
-                                    "com.bysj.imageutil.fileprovider", captureFile);
+                                    "com.bysj.imageutil.fileprovider", file);
                             intent.putExtra(MediaStore.EXTRA_OUTPUT, uriForFile);
                             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -339,14 +331,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
      */
     private void handleImg() {
 
-        String imgPath = isCapture ? captureFilePath : photosPath;
-        if ( TextUtils.isEmpty(imgPath) ) {
+        if ( TextUtils.isEmpty(imgChoosePath) ) {
 
             myToast(getString(R.string.img_is_null));
-        } else {
-
-
+            return;
         }
+        OpenCV openCV = new OpenCV();
+        Bitmap bitmap = openCV.getBitmap(BitmapFactory.decodeFile(imgChoosePath));
+        Glide.with(mImgSource.getContext())
+                .load(bitmap)
+                .placeholder(android.R.color.darker_gray)
+                .into(mImgSource);
+        Glide.with(mImgTarget.getContext())
+                .load(bitmap)
+                .placeholder(android.R.color.darker_gray)
+                .into(mImgTarget);
     }
 
     /**
@@ -355,6 +354,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
      */
     private void clearCacheCapture(String saveFileName) {
 
+        if ( TextUtils.isEmpty(saveFileName) ) {
+
+            return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -371,7 +374,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                     String fileName = file.getPath();
                     if ( fileName.contains(".jpg") && fileName.contains("capture") && !fileName.equals(saveFileName)) {
 
-                        LogCat.d(MainActivity.TAG, fileName);
+                        LogCat.d(MainActivity.TAG + "删除文件", fileName);
                         if ( file.exists() ) {
 
                             file.delete();

@@ -53,7 +53,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     // OpenCv
-    implementation project(path: ':opencv')
+    //implementation project(path: ':opencv')
+    implementation project(path: ':opencv450')
     // 图片加载
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
