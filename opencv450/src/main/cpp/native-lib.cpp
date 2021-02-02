@@ -1,14 +1,20 @@
 #include <jni.h>
 #include <string>
+#include <vector>
+#include <android/log.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/types_c.h>
 
 // C++命名空间->类似于java包
 using namespace cv;
+using namespace std;
+
+#define TAG "mainAC++"
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_bysj_opencv450_OpenCV_cppImageProcess(JNIEnv *env,
+Java_com_bysj_opencv450_OpenCVUtil_cppImageProcess(JNIEnv *env,
                                                                                 jobject jobj,
                                                                                 jint jw,
                                                                                 jint jh,
@@ -53,21 +59,50 @@ Java_com_bysj_opencv450_OpenCV_cppImageProcess(JNIEnv *env,
     env->ReleaseIntArrayElements(jPixArr, cPixArr, 0);
 }
 
+#define WIN_SIZE 15
+#define MAX_CG 7.5
+
 extern "C"
-JNIEXPORT void JNICALL
-Java_com_example_changxiaoyu_jniopencvdemo_CppImageProcessUtils_cppImageThreshold(JNIEnv *env,
-                                                                                   jclass jclass,
-                                                                                   jint jw, jint jh,
-                                                                                   jintArray jpixArr) {
-    jint* cPixArr = env->GetIntArrayElements(jpixArr,JNI_FALSE);
-    if(cPixArr == NULL){
-        return;
+JNIEXPORT jintArray JNICALL
+Java_com_bysj_opencv450_OpenCVUtil_lightPixels(JNIEnv *env, jobject ,
+                                                           jintArray pixels_, jint w, jint h) {
+    // 第一步：导入OpenCV头文件
+    // 第二步：将Java数组->C/C++数组
+    jint *cPixArr = env->GetIntArrayElements(pixels_, JNI_FALSE);
+    if (cPixArr == NULL) {
+        return pixels_;
     }
-    Mat mat_image_src(jh,jw,CV_8UC4,(unsigned char*)cPixArr);
+    // 第三步：将C/C++图片->Opencv图片
+    Mat mat_image_src(h, w, CV_8UC4, (unsigned char *) cPixArr);
+    // 增加一个往往会忽略的一步,将4通道Mat转换为3通道Mat，才能进行图像处理
     Mat mat_image_dst;
-    cvtColor(mat_image_src,mat_image_dst,CV_RGBA2GRAY,1);
-    Mat mat_image_thereshold;
-    cv::adaptiveThreshold(mat_image_dst,mat_image_thereshold,255,ADAPTIVE_THRESH_GAUSSIAN_C,CV_THRESH_BINARY,31,9);
-    cvtColor(mat_image_thereshold,mat_image_src,CV_GRAY2BGRA,4);
-    env->ReleaseIntArrayElements(jpixArr,cPixArr,0);
+    cvtColor(mat_image_src, mat_image_dst, CV_RGBA2BGR, 3);
+    // 第四步：进行图片处理
+    // 克隆一张图片
+    Mat mat_image_clone = mat_image_dst.clone();
+    //获取行数和列数
+    int row = mat_image_clone.rows;
+    int col = mat_image_clone.cols;
+
+    int n = 7;
+    int c = 5;
+    int max = 8;
+    Mat sdLocal(mat_image_clone.size(), mat_image_clone.type());
+    Mat a;
+    Mat meanLocal;
+    blur(mat_image_clone.clone(), meanLocal, Size(n, n));
+    Mat highFre = mat_image_clone - meanLocal;
+    Mat varSingle = highFre.mul(highFre);
+    Mat varLocal;
+    blur(varSingle, varLocal, Size(n, n));
+    a = meanLocal + c * highFre;
+
+
+    cvtColor(highFre, mat_image_src, CV_RGB2RGBA, 4);
+    // 第五步：将修改后的数据赋值给原始Mat->mat_image_src
+    //cvtColor(mat_image_clone, mat_image_src, CV_RGB2RGBA, 4);
+    // 第六步：更新Java数组
+    // 0:表示处理完成之后，将C的内存释放掉
+    env->ReleaseIntArrayElements(pixels_, cPixArr, 0);
+    return pixels_;
 }

@@ -31,7 +31,7 @@ import com.bysj.imageutil.util.GlideUtil;
 import com.bysj.imageutil.util.HandleKeys;
 import com.bysj.imageutil.util.IntentKeys;
 import com.bysj.imageutil.util.LogCat;
-import com.bysj.opencv450.OpenCV;
+import com.bysj.opencv450.OpenCVUtil;
 
 
 import java.io.File;
@@ -121,6 +121,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             chooseImg();
         } else if ( id == R.id.tv_save ) {
 
+            handleImg();
         }
 
     }
@@ -331,13 +332,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
      */
     private void handleImg() {
 
+
         if ( TextUtils.isEmpty(imgChoosePath) ) {
 
             myToast(getString(R.string.img_is_null));
             return;
         }
-        OpenCV openCV = new OpenCV();
-        Bitmap bitmap = openCV.getBitmap(BitmapFactory.decodeFile(imgChoosePath));
+        OpenCVUtil opencv = OpenCVUtil.getInstance();
+        Bitmap bitmap = opencv.lightPixels(BitmapFactory.decodeFile(imgChoosePath));
         Glide.with(mImgSource.getContext())
                 .load(bitmap)
                 .placeholder(android.R.color.darker_gray)
@@ -346,6 +348,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 .load(bitmap)
                 .placeholder(android.R.color.darker_gray)
                 .into(mImgTarget);
+
     }
 
     /**
