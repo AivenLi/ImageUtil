@@ -16,6 +16,8 @@
     <string name="clarity">Clarity</string>
     <string name="contrast_ratio">Contrast ratio</string>
     <string name="saturation">Saturation ratio</string>
+    <string name="loading_text">Loading…</string>
+    <string name="handing">Processing</string>
     <string name="save_image">Save</string>
     <string name="yes">Yes</string>
     <string name="cancel">Cancel</string>

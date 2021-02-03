@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bysj.imageutil.ui.components.dialog.DialogLoading;
 import com.bysj.imageutil.ui.components.dialog.DialogPrompt;
 import com.bysj.imageutil.ui.components.dialog.DialogPromptListener;
 import com.bysj.imageutil.util.ActivityManageHelper;
@@ -31,6 +32,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected Context  mContext;
     /** 弹窗 */
     protected DialogPrompt mDialog = null;
+    /** 加载 */
+    protected DialogLoading mLoading = null;
 
     @Override
     protected void onCreate(@Nullable Bundle saveInstanceState) {
@@ -152,6 +155,35 @@ public abstract class BaseActivity extends AppCompatActivity {
 
             mDialog.hide();
         }
+    }
+
+    protected void showLoading() {
+
+        if ( mLoading != null ) {
+
+            mLoading.show();
+        }
+    }
+
+    protected void showLoading(String title) {
+
+        if ( canShowLoading() ) {
+
+            mLoading.setText(title).show();
+        }
+    }
+
+    protected void hideLoading() {
+
+        if ( mLoading != null ) {
+
+            mLoading.hide();
+        }
+    }
+
+    private boolean canShowLoading() {
+
+        return mLoading != null && !mLoading.isShowing();
     }
 
     /**

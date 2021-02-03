@@ -23,6 +23,7 @@ import com.bumptech.glide.Glide;
 import com.bysj.imageutil.R;
 import com.bysj.imageutil.base.BaseActivity;
 import com.bysj.imageutil.ui.components.RegulatorView;
+import com.bysj.imageutil.ui.components.dialog.DialogLoading;
 import com.bysj.imageutil.ui.components.dialog.DialogPrompt;
 import com.bysj.imageutil.ui.components.dialog.DialogPromptListener;
 import com.bysj.imageutil.util.FileUtils;
@@ -31,6 +32,7 @@ import com.bysj.imageutil.util.GlideUtil;
 import com.bysj.imageutil.util.HandleKeys;
 import com.bysj.imageutil.util.IntentKeys;
 import com.bysj.imageutil.util.LogCat;
+import com.bysj.opencv450.HandleImageListener;
 import com.bysj.opencv450.OpenCVUtil;
 
 
@@ -70,13 +72,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     private float               contrastValue;
     /** 饱和度的当前值 */
     private float               saturationValue;
+    /** 是否正在处理图片 */
+    private boolean             isHandling         = false;
+    /** OpenCV工具 */
+    private OpenCVUtil          opencv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         /** 加载opencv动态库 */
+        opencv = OpenCVUtil.getInstance();
         mDialog = new DialogPrompt(mContext);
+        mLoading = new DialogLoading(mContext);
         imgConstantPath = mContext.getCacheDir().getPath() + "/";
     }
 
@@ -121,7 +129,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             chooseImg();
         } else if ( id == R.id.tv_save ) {
 
-            handleImg();
+            //handleImg();
         }
 
     }
@@ -182,6 +190,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         } else if ( what == HandleKeys.COPY_FILE_FAILURE ) {
 
             LogCat.d(TAG + "获取失败", (String)msg.obj);
+        } else if ( what == HandleKeys.ENHANCE_CONTRAST_DONE ) {
+
+            hideLoading();
+            isHandling = false;
+            Bitmap bitmap = (Bitmap)msg.obj;
+            Glide.with(mImgSource.getContext())
+                    .load(bitmap)
+                    .placeholder(android.R.color.darker_gray)
+                    .into(mImgSource);
+            Glide.with(mImgTarget.getContext())
+                    .load(bitmap)
+                    .placeholder(android.R.color.darker_gray)
+                    .into(mImgTarget);
         }
     }
 
@@ -243,17 +264,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
         mRglSaturation.setShowText(true);
         mRglSaturation.setCanAdjust(true);
+        mRglSaturation.setChangingCallback(false);
         mRglContrast.setShowText(true);
         mRglContrast.setCanAdjust(true);
+        mRglContrast.setChangingCallback(false);
         mRglClarity.setShowText(true);
         mRglClarity.setCanAdjust(true);
+        mRglClarity.setChangingCallback(false);
 
         mRglSaturation.setOnValueChangeListener(new RegulatorView.OnValueChangeListener() {
             @Override
             public void onValueChange(float value) {
 
                 saturationValue = value;
-                handleImg();
+                myToast("暂未实现该功能");
             }
         });
         mRglContrast.setOnValueChangeListener(new RegulatorView.OnValueChangeListener() {
@@ -261,7 +285,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             public void onValueChange(float value) {
 
                 contrastValue = value;
-                handleImg();
+                enhanceContrast(value / 100.0f, false);
             }
         });
         mRglClarity.setOnValueChangeListener(new RegulatorView.OnValueChangeListener() {
@@ -269,7 +293,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             public void onValueChange(float value) {
 
                 clarityValue = value;
-                handleImg();
+                myToast("暂未实现该功能");
             }
         });
     }
@@ -328,27 +352,62 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     }
 
     /**
-     * 处理图片
+     * 增强对比图处理
+     * @param coefficient 增强系数
+     * @param adaptive 是否自适应
      */
-    private void handleImg() {
+    private void enhanceContrast(float coefficient, boolean adaptive) {
 
+        if ( hasImage() ) {
 
-        if ( TextUtils.isEmpty(imgChoosePath) ) {
+            if ( isHandling ) {
+
+                myToast(getString(R.string.handing));
+                return;
+            }
+            isHandling = true;
+            showLoading();
+            Bitmap bitmap = BitmapFactory.decodeFile(imgChoosePath);
+            if ( adaptive ) {
+
+                opencv.changeContrastSync(bitmap, contrastListener);
+            } else {
+
+                opencv.changeContrastSync(bitmap, coefficient, contrastListener);
+            }
+        } else {
 
             myToast(getString(R.string.img_is_null));
-            return;
         }
-        OpenCVUtil opencv = OpenCVUtil.getInstance();
-        Bitmap bitmap = opencv.lightPixels(BitmapFactory.decodeFile(imgChoosePath));
-        Glide.with(mImgSource.getContext())
-                .load(bitmap)
-                .placeholder(android.R.color.darker_gray)
-                .into(mImgSource);
-        Glide.with(mImgTarget.getContext())
-                .load(bitmap)
-                .placeholder(android.R.color.darker_gray)
-                .into(mImgTarget);
+    }
 
+    HandleImageListener contrastListener = new HandleImageListener() {
+        @Override
+        public void done(Bitmap bitmap) {
+
+            sendMessage(HandleKeys.ENHANCE_CONTRAST_DONE, bitmap);
+        }
+    };
+
+    HandleImageListener clarityListener = new HandleImageListener() {
+        @Override
+        public void done(Bitmap bitmap) {
+
+            sendMessage(HandleKeys.ENHANCE_CLARITY_DONE, bitmap);
+        }
+    };
+
+    HandleImageListener saturationListener = new HandleImageListener() {
+        @Override
+        public void done(Bitmap bitmap) {
+
+            sendMessage(HandleKeys.ENHANCE_SATURATION_DONE, bitmap);
+        }
+    };
+
+    private boolean hasImage() {
+
+        return !TextUtils.isEmpty(imgChoosePath);
     }
 
     /**

@@ -47,16 +47,6 @@ public class OpenCVUtil {
     }
 
     /**
-     * 增强对比度
-     * @param bitmap
-     * @return
-     */
-    public Bitmap iContrastEnhance(Bitmap bitmap) {
-
-        return bitmap;
-    }
-
-    /**
      * 增强饱和度
      * @param bitmap
      * @return
@@ -66,40 +56,152 @@ public class OpenCVUtil {
         return bitmap;
     }
 
-    public Bitmap getBitmap(Bitmap bitmap){
-        // 第一步：确定图片大小
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        // 第二步：将Bitmap->像素数组
-        int[] pixArr = new int[width*height];
-        bitmap.getPixels(pixArr,0,width,0,0,width,height);
-        // 第三步：调用native方法
-        cppImageProcess(width,height,pixArr,60);
-        // 返回一张新的图片
-        Bitmap newBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.RGB_565);
-        // 给我们的图片填充数据
-        newBitmap.setPixels(pixArr,0,width,0,0,width,height);
-        return newBitmap;
+    /**
+     * 自适应算法增强图像对比度
+     * @param bitmap 原始图片
+     * @return 增强对比度之后的图片
+     */
+    public Bitmap changeContrast(Bitmap bitmap) {
+
+        /**
+         * 创建图片矩阵对象
+         */
+        PictureMatrix pictureMatrix = new PictureMatrix(bitmap);
+        /**
+         * 调用C++库，自适应增强对比度算法
+         */
+        int[] resultMatrix = changeContrast(pictureMatrix.getMatrix(), pictureMatrix.getWidth(), pictureMatrix.getHeight(), 0.2f);
+        /**
+         * 保存结果（矩阵）
+         */
+        pictureMatrix.setMatrix(resultMatrix);
+        /**
+         * 返回bitmap结果
+         */
+        return pictureMatrix.toBitmap();
     }
 
-    public Bitmap lightPixels(Bitmap bitmap) {
+    /**
+     * 自适应算法增强图像对比度
+     * @param bitmap 原始图片
+     * @param coefficient 增强系数
+     * @return 增强对比度之后的图片
+     */
+    public Bitmap changeContrast(Bitmap bitmap, float coefficient) {
 
-        // 第一步：确定图片大小
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        // 第二步：将Bitmap->像素数组
-        int[] pixArr = new int[width*height];
-        bitmap.getPixels(pixArr,0,width,0,0,width,height);
-        // 第三步：调用native方法
-        pixArr = lightPixels(pixArr, width, height);
-        // 返回一张新的图片
-        Bitmap newBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.RGB_565);
-        // 给我们的图片填充数据
-        newBitmap.setPixels(pixArr,0,width,0,0,width,height);
-        return newBitmap;
+        /**
+         * 检查系数
+         */
+        if ( coefficient < 0.01f ) {
+
+            coefficient = 0.01f;
+        } else if ( coefficient > 1.0000f ) {
+
+            coefficient = 0.9f;
+        }
+        /**
+         * 创建图片矩阵对象
+         */
+        PictureMatrix pictureMatrix = new PictureMatrix(bitmap);
+        /**
+         * 调用C++库，自适应增强对比度算法
+         */
+        int[] resultMatrix = changeContrast(pictureMatrix.getMatrix(), pictureMatrix.getWidth(), pictureMatrix.getHeight(), coefficient);
+        /**
+         * 保存结果（矩阵）
+         */
+        pictureMatrix.setMatrix(resultMatrix);
+        /**
+         * 返回bitmap结果
+         */
+        return pictureMatrix.toBitmap();
     }
 
-    private native void cppImageProcess(int w, int h, int[] arr, int ld);
+    /**
+     * 自适应改变图片对比度异步
+     * @param bitmap 原始图片
+     * @param listener 完成后的回调
+     */
+    public void changeContrastSync(Bitmap bitmap, HandleImageListener listener) {
 
-    private native int[] lightPixels(int[] arr, int w, int j);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                /**
+                 * 创建图片矩阵对象
+                 */
+                PictureMatrix pictureMatrix = new PictureMatrix(bitmap);
+                /**
+                 * 调用C++库，自适应增强对比度算法
+                 */
+                int[] resultMatrix = changeContrast(pictureMatrix.getMatrix(), pictureMatrix.getWidth(), pictureMatrix.getHeight(), 0.2f);
+                /**
+                 * 保存结果
+                 */
+                pictureMatrix.setMatrix(resultMatrix);
+                /**
+                 * 回传结果给调用者
+                 */
+                if ( listener != null ) {
+
+                    listener.done(pictureMatrix.toBitmap());
+                }
+            }
+        }).start();
+    }
+
+    /**
+     * 自适应改变图片对比度异步
+     * @param bitmap 原始图片
+     * @param coefficient 增强系数
+     * @param listener 完成后的回调
+     */
+    public void changeContrastSync(Bitmap bitmap, float coefficient, HandleImageListener listener) {
+
+        /**
+         * 检查系数
+         */
+        if ( coefficient < 0.01f ) {
+
+            coefficient = 0.01f;
+        } else if ( coefficient > 1.0000f ) {
+
+            coefficient = 0.9f;
+        }
+        final float cft = coefficient;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                /**
+                 * 创建图片矩阵对象
+                 */
+                PictureMatrix pictureMatrix = new PictureMatrix(bitmap);
+                /**
+                 * 调用C++库，自适应增强对比度算法
+                 */
+                int[] resultMatrix = changeContrast(pictureMatrix.getMatrix(), pictureMatrix.getWidth(), pictureMatrix.getHeight(), cft);
+                /**
+                 * 保存结果
+                 */
+                pictureMatrix.setMatrix(resultMatrix);
+                /**
+                 * 回传结果给调用者
+                 */
+                if ( listener != null ) {
+
+                    listener.done(pictureMatrix.toBitmap());
+                }
+            }
+        }).start();
+    }
+
+    /**
+     * 连接C++库方法
+     * @param matrix 图片矩阵
+     * @param width 图片宽度
+     * @param height 图片高度
+     * @param coefficient 增强系数
+     * @return 修改之后的图片矩阵
+     */
+    private native int[] changeContrast(int[] matrix, int width, int height, float coefficient);
 }

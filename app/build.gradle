@@ -65,5 +65,8 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
 
     // 图片选择
-    implementation 'com.github.yalantis:ucrop:2.2.6'
+    //implementation 'com.github.yalantis:ucrop:2.2.6'
+
+    // 圆图（可带边框）
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
 }

@@ -26,6 +26,17 @@ public class RegulatorView extends View {
     private float minValue=0;//最小值
     private boolean isShowText=false;//是否显示文字提示
     private boolean isCanAdjust=false;//是否可以调节
+    /**
+     * 该标志位主要作用如下：
+     *     设置其为true，表示每当值发生变化时都会回调，
+     *     设置其为false，只有当值变化过程结束后再回调。
+     */
+    private boolean changingCallback = true;
+    /**
+     * 触摸（或点击）事件是否结束
+     */
+    private boolean touchEnd;
+
     private Paint mPaint;
     private Rect mBound;
     public RegulatorView(Context context) {
@@ -65,11 +76,13 @@ public class RegulatorView extends View {
         if(!isCanAdjust) return true;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                touchEnd = false;
                 preX=event.getX();
                 isMoveEvent=false;
                 isDownInBtn=isDownInBtn(preX);
                 break;
             case MotionEvent.ACTION_MOVE:
+                touchEnd = false;
                 int disX=(int) (event.getX() - preX);
                 if(Math.abs(disX)>3) isMoveEvent=true;
                 preX=event.getX();
@@ -79,14 +92,16 @@ public class RegulatorView extends View {
                 }
                 break;
             case MotionEvent.ACTION_UP:
+                touchEnd = true;
                 preX=event.getX();
-                if(!isMoveEvent){//响应点击事件
-                    if(!isDownInBtn){
-                        //计算当前值时，先计算出占比值再加上最小值，这样可以兼容负值计算
-
-                        setCurrentValue((preX-getPaddingLeft()-BTN_RADIUS)/getBarWidth()*(maxValue-minValue)+minValue);
-                    }
-                }
+//                if(!isMoveEvent){//响应点击事件
+//                    if(!isDownInBtn){
+//                        //计算当前值时，先计算出占比值再加上最小值，这样可以兼容负值计算
+//
+//                        setCurrentValue((preX-getPaddingLeft()-BTN_RADIUS)/getBarWidth()*(maxValue-minValue)+minValue);
+//                    }
+//                }
+                setCurrentValue((preX-getPaddingLeft()-BTN_RADIUS)/getBarWidth()*(maxValue-minValue)+minValue);
                 break;
             default:
                 break;
@@ -188,11 +203,38 @@ public class RegulatorView extends View {
     }
 
     public void setCurrentValue(float currentValue) {
+
         this.currentValue = Math.min(currentValue, maxValue);
         this.currentValue = Math.max(this.currentValue, minValue);
         this.currentValue = Math.round(this.currentValue);
-        if(onValueChangeListener!=null) onValueChangeListener.onValueChange(this.currentValue);
+        if ( changingCallback ) {
+
+            if( onValueChangeListener != null ) {
+
+                onValueChangeListener.onValueChange(this.currentValue);
+            }
+        } else {
+
+            if ( touchEnd ) {
+
+                if( onValueChangeListener != null ) {
+
+                    onValueChangeListener.onValueChange(this.currentValue);
+                }
+            }
+        }
+
         invalidate();
+    }
+
+    public boolean isChangingCallback() {
+
+        return changingCallback;
+    }
+
+    public void setChangingCallback(boolean changingCallback) {
+
+        this.changingCallback = changingCallback;
     }
 
     public float getMaxValue() {
