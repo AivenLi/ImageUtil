@@ -194,16 +194,30 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
             hideLoading();
             isHandling = false;
-            Bitmap bitmap = (Bitmap)msg.obj;
-            Glide.with(mImgSource.getContext())
-                    .load(bitmap)
-                    .placeholder(android.R.color.darker_gray)
-                    .into(mImgSource);
-            Glide.with(mImgTarget.getContext())
-                    .load(bitmap)
-                    .placeholder(android.R.color.darker_gray)
-                    .into(mImgTarget);
+            tempSetImageSource((Bitmap)msg.obj);
+        } else if ( what == HandleKeys.ENHANCE_SATURATION_DONE ) {
+
+            hideLoading();
+            isHandling = false;
+            tempSetImageSource((Bitmap)msg.obj);
         }
+    }
+
+    /**
+     * 项目快完工时不再需要本方法。
+     * 项目还没有全部完成，后面可能还有一些细节要调整，先用该方法来展示结果。
+     * @param bitmap
+     */
+    private void tempSetImageSource(Bitmap bitmap) {
+
+        Glide.with(mImgSource.getContext())
+                .load(bitmap)
+                .placeholder(android.R.color.darker_gray)
+                .into(mImgSource);
+        Glide.with(mImgTarget.getContext())
+                .load(bitmap)
+                .placeholder(android.R.color.darker_gray)
+                .into(mImgTarget);
     }
 
     @Override
@@ -277,7 +291,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             public void onValueChange(float value) {
 
                 saturationValue = value;
-                myToast("暂未实现该功能");
+                changeSaturation(value+50.0f, false);
             }
         });
         mRglContrast.setOnValueChangeListener(new RegulatorView.OnValueChangeListener() {
@@ -349,6 +363,36 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                         startActivityForResult(intent, IntentKeys.MAIN_TO_PHOTOS);
                     }
                 });
+    }
+
+    /**
+     * 增强对比图处理
+     * @param coefficient 增强系数
+     * @param adaptive 是否自适应
+     */
+    private void changeSaturation(float coefficient, boolean adaptive) {
+
+        if ( hasImage() ) {
+
+            if ( isHandling ) {
+
+                myToast(getString(R.string.handing));
+                return;
+            }
+            isHandling = true;
+            showLoading();
+            Bitmap bitmap = BitmapFactory.decodeFile(imgChoosePath);
+            if ( adaptive ) {
+
+                opencv.changeSaturationSync(bitmap, saturationListener);
+            } else {
+
+                opencv.changeSaturationSync(bitmap, coefficient, saturationListener);
+            }
+        } else {
+
+            myToast(getString(R.string.img_is_null));
+        }
     }
 
     /**
