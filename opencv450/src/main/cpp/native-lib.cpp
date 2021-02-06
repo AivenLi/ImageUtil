@@ -284,3 +284,93 @@ Java_com_bysj_opencv450_OpenCVUtil_changeSaturation(JNIEnv *env, jobject,
     env->ReleaseIntArrayElements(sourceArray, cPixArr, 0);
     return sourceArray;
 }
+
+/**
+ * 改变图像对比度
+ * @param env JNI环境变量，JNI自动传递，固定参数
+ * @param jobeject 固定参数
+ * @param sourceArray 源图像矩阵
+ * @param width 图像宽度
+ * @param height 图像高度
+ * @param coefficient 调整系数，该值越大对比度越大
+ * @return jintArray 处理后的图片矩阵
+ */
+extern "C"
+JNIEXPORT jintArray JNICALL
+Java_com_bysj_opencv450_OpenCVUtil_changeClarity(JNIEnv *env, jobject,
+                                                    jintArray sourceArray, jint width, jint height) {
+
+    // 第一步：导入OpenCV头文件
+    // 第二步：将Java数组->C/C++数组
+    jint *cPixArr = env->GetIntArrayElements(sourceArray, JNI_FALSE);
+    if (cPixArr == NULL) {
+        return sourceArray;
+    }
+    // 第三步：将C/C++图片->Opencv图片
+    Mat mat_image_src(height, width, CV_8UC4, (unsigned char *) cPixArr);
+    // 增加一个往往会忽略的一步,将4通道Mat转换为3通道Mat，才能进行图像处理
+    Mat mat_image_dst;
+    cvtColor(mat_image_src, mat_image_dst, CV_RGB2BGR, 3);
+    // 第四步：进行图片处理
+    // 克隆一张图片
+    Mat mat_image_clone = mat_image_dst.clone();
+    //获取行数和列数
+    int row = mat_image_clone.rows;
+    int col = mat_image_clone.cols;
+
+    for ( int i = 0; i < row; i++ ) {
+
+        for ( int j = 0; j < col; j++ ) {
+
+            int temp = 0;//用来计算新的中心像素点值
+
+            int oper[3][3] = {{-1,-1,-1},{-1,10,-1},{-1,-1,-1}};//拉普拉斯算子
+
+            for(int k = 0;k < 3;k++){
+
+                for(int l = 0;l < 3;l++){
+
+                    //当算子位于边缘区域时，排除图像中不存在的点
+
+                    if((i-1+k < 0) || (j-1+l < 0) || (i-1+k >= row) || (j-1+l >= col))
+
+                        continue;
+
+                    temp += oper[k][l]*mat_image_clone.at<Vec3b>(i-1+k,j-1+l)[0];
+
+                }
+
+            }
+
+            //当计算结果超出255，就把它置为255
+
+            if(temp > 255){
+
+                temp = 255;
+
+            }
+
+            //当计算结果小于0，就把它置为0
+
+            if(temp < 0){
+
+                temp = 0;
+
+            }
+
+            //将计算结果赋给中心像素点的三通道值
+
+            for(int m = 0;m < 3;m++){
+
+                mat_image_clone.at<Vec3b>(i,j)[m] = temp;
+            }
+        }
+    }
+
+    // 第五步：将修改后的数据赋值给原始Mat->mat_image_src
+    cvtColor(mat_image_clone, mat_image_src, CV_RGB2BGR, 4);
+    // 第六步：更新Java数组
+    // 0:表示处理完成之后，将C的内存释放掉
+    env->ReleaseIntArrayElements(sourceArray, cPixArr, 0);
+    return sourceArray;
+}

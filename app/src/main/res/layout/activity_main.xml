@@ -21,15 +21,10 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/lyt_controller"
+            app:layout_constraintBottom_toTopOf="@id/img_target"
             >
             <ImageView
                 android:id="@+id/img_source"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                />
-            <ImageView
-                android:id="@+id/img_target"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 />
@@ -58,13 +53,22 @@
                     />
             </LinearLayout>
         </FrameLayout>
+        <ImageView
+            android:id="@+id/img_target"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/flt_image"
+            app:layout_constraintBottom_toTopOf="@id/lyt_controller"
+            />
         <LinearLayout
             android:id="@+id/lyt_controller"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/flt_image"
+            app:layout_constraintTop_toBottomOf="@id/img_target"
             app:layout_constraintBottom_toTopOf="@id/tv_save"
             android:orientation="vertical"
             >

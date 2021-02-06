@@ -67,15 +67,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     /** 相机拍照后的图片文件名 */
     private String              imgChoosePath       = null;
     /** 清晰度的当前值 */
-    private float               clarityValue;
+    private float               clarityValue        = 0.0f;
     /** 对比度的当前值 */
-    private float               contrastValue;
+    private float               contrastValue       = 0.0f;
     /** 饱和度的当前值 */
-    private float               saturationValue;
+    private float               saturationValue     = 0.0f;
     /** 是否正在处理图片 */
-    private boolean             isHandling         = false;
+    private boolean             isHandling          = false;
     /** OpenCV工具 */
     private OpenCVUtil          opencv;
+    /** 处理后的图片 */
+    private Bitmap              targetBitmap        = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,6 +150,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
              */
             if ( requestCode == IntentKeys.MAIN_TO_PHOTOS ) {
 
+                targetBitmap = null;
+                mImgTarget.setVisibility(View.GONE);
                 String path = GetImgPath.getPath(mContext, data.getData());
                 if ( !TextUtils.isEmpty(path) ) {
 
@@ -173,6 +177,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
              */
             if ( requestCode == IntentKeys.MAIN_TO_CAMERA ) {
 
+                targetBitmap = null;
+                mImgTarget.setVisibility(View.GONE);
                 setShowImage(true);
             }
         }
@@ -194,12 +200,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
             hideLoading();
             isHandling = false;
-            tempSetImageSource((Bitmap)msg.obj);
+            targetBitmap = (Bitmap)msg.obj;
+            tempSetImageSource(targetBitmap);
         } else if ( what == HandleKeys.ENHANCE_SATURATION_DONE ) {
 
             hideLoading();
             isHandling = false;
-            tempSetImageSource((Bitmap)msg.obj);
+            targetBitmap = (Bitmap)msg.obj;
+            tempSetImageSource(targetBitmap);
+        } else if ( what == HandleKeys.ENHANCE_CLARITY_DONE ) {
+
+            hideLoading();;
+            isHandling = false;
+            targetBitmap = (Bitmap)msg.obj;
+            tempSetImageSource(targetBitmap);
         }
     }
 
@@ -210,10 +224,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
      */
     private void tempSetImageSource(Bitmap bitmap) {
 
-        Glide.with(mImgSource.getContext())
-                .load(bitmap)
-                .placeholder(android.R.color.darker_gray)
-                .into(mImgSource);
+        mImgTarget.setVisibility(View.VISIBLE);
         Glide.with(mImgTarget.getContext())
                 .load(bitmap)
                 .placeholder(android.R.color.darker_gray)
@@ -240,14 +251,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
             mTvSave.setVisibility(View.GONE);
             mImgSource.setVisibility(View.GONE);
-            mImgTarget.setVisibility(View.GONE);
             mLytController.setVisibility(View.GONE);
             mLytAddImgPrompt.setVisibility(View.VISIBLE);
         } else {
 
             mTvSave.setVisibility(View.VISIBLE);
             mImgSource.setVisibility(View.VISIBLE);
-            mImgTarget.setVisibility(View.VISIBLE);
             mLytController.setVisibility(View.VISIBLE);
             mLytAddImgPrompt.setVisibility(View.GONE);
             loadImage();
@@ -264,10 +273,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 .load(imgChoosePath)
                 .placeholder(android.R.color.darker_gray)
                 .into(mImgSource);
-        Glide.with(mImgTarget.getContext())
-                .load(imgChoosePath)
-                .placeholder(android.R.color.darker_gray)
-                .into(mImgTarget);
         clearCacheCapture(imgChoosePath);
     }
 
@@ -291,7 +296,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             public void onValueChange(float value) {
 
                 saturationValue = value;
-                changeSaturation(value+50.0f, false);
+                changeSaturation(saturationValue+50.0f, false);
             }
         });
         mRglContrast.setOnValueChangeListener(new RegulatorView.OnValueChangeListener() {
@@ -299,7 +304,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             public void onValueChange(float value) {
 
                 contrastValue = value;
-                enhanceContrast(value / 100.0f, false);
+                enhanceContrast(contrastValue / 100.0f, false);
             }
         });
         mRglClarity.setOnValueChangeListener(new RegulatorView.OnValueChangeListener() {
@@ -307,7 +312,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             public void onValueChange(float value) {
 
                 clarityValue = value;
-                myToast("暂未实现该功能");
+                enhanceClarity();
             }
         });
     }
@@ -372,26 +377,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
      */
     private void changeSaturation(float coefficient, boolean adaptive) {
 
-        if ( hasImage() ) {
+        Bitmap bitmap = getTargetBitmap();
+        if ( bitmap != null ) {
 
-            if ( isHandling ) {
-
-                myToast(getString(R.string.handing));
-                return;
-            }
-            isHandling = true;
-            showLoading();
-            Bitmap bitmap = BitmapFactory.decodeFile(imgChoosePath);
             if ( adaptive ) {
 
-                opencv.changeSaturationSync(bitmap, saturationListener);
+                opencv.changeSaturationSync(bitmap, contrastListener);
             } else {
 
-                opencv.changeSaturationSync(bitmap, coefficient, saturationListener);
+                opencv.changeSaturationSync(bitmap, coefficient, contrastListener);
             }
-        } else {
-
-            myToast(getString(R.string.img_is_null));
         }
     }
 
@@ -402,16 +397,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
      */
     private void enhanceContrast(float coefficient, boolean adaptive) {
 
-        if ( hasImage() ) {
+        Bitmap bitmap = getTargetBitmap();
+        if ( bitmap != null ) {
 
-            if ( isHandling ) {
-
-                myToast(getString(R.string.handing));
-                return;
-            }
-            isHandling = true;
-            showLoading();
-            Bitmap bitmap = BitmapFactory.decodeFile(imgChoosePath);
             if ( adaptive ) {
 
                 opencv.changeContrastSync(bitmap, contrastListener);
@@ -419,9 +407,45 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
                 opencv.changeContrastSync(bitmap, coefficient, contrastListener);
             }
+        }
+    }
+
+    /**
+     * 增强图片清晰度
+     */
+    private void enhanceClarity() {
+
+        Bitmap bitmap = getTargetBitmap();
+        if ( bitmap != null ) {
+
+            opencv.changeContrastSync(bitmap, clarityListener);
+        }
+    }
+
+    private Bitmap getTargetBitmap() {
+
+        if ( hasImage() ) {
+
+            if ( isHandling ) {
+
+                myToast(getString(R.string.handing));
+                return null;
+            }
+            isHandling = true;
+            showLoading();
+            Bitmap bitmap;
+            if ( targetBitmap != null ) {
+
+                bitmap = targetBitmap;
+            } else {
+
+                bitmap = BitmapFactory.decodeFile(imgChoosePath);
+            }
+            return bitmap;
         } else {
 
             myToast(getString(R.string.img_is_null));
+            return null;
         }
     }
 

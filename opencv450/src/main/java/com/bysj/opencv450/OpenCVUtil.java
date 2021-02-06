@@ -6,13 +6,16 @@ import java.io.File;
 
 /**
  * 调用C++库，对外提供接口。
- * 单例模式
  * Create on 2021-2-1
  */
 
 public class OpenCVUtil {
 
+    /**
+     * 使用单例模式
+     */
     private static OpenCVUtil mInstance = null;
+
     /**
      * 加载C++库
      */
@@ -20,6 +23,10 @@ public class OpenCVUtil {
         System.loadLibrary("native-lib");
     }
 
+    /**
+     * 获取实例
+     * @return
+     */
     public static OpenCVUtil getInstance() {
 
         if ( mInstance == null ) {
@@ -32,28 +39,11 @@ public class OpenCVUtil {
         return mInstance;
     }
 
+    /**
+     * 私有构造方法
+     */
     private OpenCVUtil() {
 
-    }
-
-    /**
-     * 增强清晰度
-     * @param bitmap 图片的Bitmap
-     * @return 增强后的Bitmap
-     */
-    public Bitmap iClarytyEnhance(Bitmap bitmap) {
-
-        return bitmap;
-    }
-
-    /**
-     * 增强饱和度
-     * @param bitmap
-     * @return
-     */
-    public Bitmap iSaturationEnhance(Bitmap bitmap) {
-
-        return bitmap;
     }
 
     /**
@@ -224,6 +214,66 @@ public class OpenCVUtil {
     }
 
     /**
+     * 增强图片清晰度
+     * @param bitmap 原图
+     * @return 增强之后的图
+     */
+    public Bitmap changeClarity(Bitmap bitmap) {
+
+        /**
+         * 创建图片矩阵对象
+         */
+        PictureMatrix pictureMatrix = new PictureMatrix(bitmap);
+        /**
+         * 调用C++库，自适应增强对比度算法
+         */
+        int[] resultMatrix = changeClarity(pictureMatrix.getMatrix(), pictureMatrix.getWidth(), pictureMatrix.getHeight());
+        /**
+         * 保存结果
+         */
+        pictureMatrix.setMatrix(resultMatrix);
+        /**
+         * 返回结果
+         */
+        return pictureMatrix.toBitmap();
+    }
+
+    /**
+     * 增强图片清晰度，异步
+     * @param bitmap 原图
+     * @param listener 回调
+     */
+    public void changeClaritySync(Bitmap bitmap, HandleImageListener listener) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                /**
+                 * 创建图片矩阵对象
+                 */
+                PictureMatrix pictureMatrix = new PictureMatrix(bitmap);
+                /**
+                 * 调用C++库，自适应增强对比度算法
+                 */
+                int[] resultMatrix = changeClarity(pictureMatrix.getMatrix(), pictureMatrix.getWidth(), pictureMatrix.getHeight());
+                /**
+                 * 保存结果
+                 */
+                pictureMatrix.setMatrix(resultMatrix);
+                /**
+                 * 回调
+                 */
+                if ( listener != null ) {
+
+                    listener.done(pictureMatrix.toBitmap());
+                }
+            }
+        }).start();
+    }
+
+
+    /**
      * 检查对比度系数，如果系数不在范围内，则调整系数至极限值：[0.01, 0.9]
      * @param coefficient 系数
      * @return
@@ -273,4 +323,6 @@ public class OpenCVUtil {
      * @return 修改之后的图片矩阵
      */
     private native int[] changeSaturation(int[] matrix, int width, int height, float coefficient);
+
+    private native int[] changeClarity(int[] matrix, int width, int height);
 }
