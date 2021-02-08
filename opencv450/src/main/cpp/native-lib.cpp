@@ -164,7 +164,7 @@ Java_com_bysj_opencv450_OpenCVUtil_changeContrast(JNIEnv *env, jobject,
 
 
 /**
- * 改变图像对比度
+ * 改变图像饱和度
  * @param env JNI环境变量，JNI自动传递，固定参数
  * @param jobeject 固定参数
  * @param sourceArray 源图像矩阵
@@ -286,7 +286,7 @@ Java_com_bysj_opencv450_OpenCVUtil_changeSaturation(JNIEnv *env, jobject,
 }
 
 /**
- * 改变图像对比度
+ * 改变图像清晰度
  * @param env JNI环境变量，JNI自动传递，固定参数
  * @param jobeject 固定参数
  * @param sourceArray 源图像矩阵
