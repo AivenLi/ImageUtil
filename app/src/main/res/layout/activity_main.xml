@@ -69,7 +69,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/img_target"
-            app:layout_constraintBottom_toTopOf="@id/tv_save"
+            app:layout_constraintBottom_toTopOf="@id/lyt_bottom"
             android:orientation="vertical"
             >
             <LinearLayout
@@ -136,21 +136,42 @@
                     />
             </LinearLayout>
         </LinearLayout>
-        <TextView
-            android:id="@+id/tv_save"
+
+        <LinearLayout
+            android:id="@+id/lyt_bottom"
             android:layout_width="0dp"
             android:layout_height="40dp"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"
-            android:text="@string/save_image"
-            android:textSize="@dimen/save_image"
-            android:textColor="@color/white"
-            android:background="@drawable/confirm_bg"
-            android:gravity="center"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/lyt_controller"
-            />
+            >
+            <TextView
+                android:id="@+id/tv_save"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:text="@string/save_image"
+                android:textSize="@dimen/save_image"
+                android:textColor="@color/white"
+                android:background="@drawable/confirm_bg"
+                android:gravity="center"
+                />
+            <TextView
+                android:id="@+id/tv_reduction"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginRight="15dp"
+                android:layout_marginLeft="15dp"
+                android:text="@string/reduction"
+                android:textSize="@dimen/save_image"
+                android:textColor="@color/white"
+                android:background="@drawable/confirm_bg"
+                android:gravity="center"
+                />
+        </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

@@ -59,6 +59,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     private RegulatorView       mRglSaturation;
     /** 保存图片按钮 */
     private TextView            mTvSave;
+    /** 还原图片 */
+    private TextView            mTvReduction;
 
     /** 再按一次退出程序 */
     private long                exitTime            = 0;
@@ -83,7 +85,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        /** 加载opencv动态库 */
+
         opencv = OpenCVUtil.getInstance();
         mDialog = new DialogPrompt(mContext);
         mLoading = new DialogLoading(mContext);
@@ -107,6 +109,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         mRglSaturation   = findViewById(R.id.rgl_saturation);
         mLytController   = findViewById(R.id.lyt_controller);
         mTvSave          = findViewById(R.id.tv_save);
+        mTvReduction     = findViewById(R.id.tv_reduction);
 
         setShowImage(false);
         initRglRatio();
@@ -119,6 +122,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         mImgTarget.setOnClickListener(this);
         mLytAddImgPrompt.setOnClickListener(this);
         mTvSave.setOnClickListener(this);
+        mTvReduction.setOnClickListener(this);
     }
 
     @Override
@@ -132,8 +136,26 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         } else if ( id == R.id.tv_save ) {
 
             //handleImg();
-        }
+        } else if ( id == R.id.tv_reduction ) {
 
+            targetBitmap = getFileToBitmap();
+            if ( targetBitmap == null ) {
+
+                myToast(getString(R.string.img_is_null));
+            } else {
+
+                tempSetImageSource(targetBitmap);
+                saturationValue = 50.0f;
+                clarityValue    = 50.0f;
+                contrastValue   = 50.0f;
+                /**
+                 * 将调整的参数复原，不回调
+                 */
+                mRglSaturation.setCurrentValue(saturationValue, false);
+                mRglContrast.setCurrentValue(contrastValue, false);
+                mRglClarity.setCurrentValue(clarityValue, false);
+            }
+        }
     }
 
     @Override
@@ -250,12 +272,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         if ( !hasImg ) {
 
             mTvSave.setVisibility(View.GONE);
+            mTvReduction.setVisibility(View.GONE);
             mImgSource.setVisibility(View.GONE);
             mLytController.setVisibility(View.GONE);
             mLytAddImgPrompt.setVisibility(View.VISIBLE);
         } else {
 
             mTvSave.setVisibility(View.VISIBLE);
+            mTvReduction.setVisibility(View.VISIBLE);
             mImgSource.setVisibility(View.VISIBLE);
             mLytController.setVisibility(View.VISIBLE);
             mLytAddImgPrompt.setVisibility(View.GONE);
@@ -312,7 +336,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             public void onValueChange(float value) {
 
                 clarityValue = value;
-                enhanceClarity();
+                enhanceClarity(clarityValue / 10.0f);
             }
         });
     }
@@ -413,12 +437,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     /**
      * 增强图片清晰度
      */
-    private void enhanceClarity() {
+    private void enhanceClarity(float coefficient) {
 
         Bitmap bitmap = getTargetBitmap();
         if ( bitmap != null ) {
 
-            opencv.changeContrastSync(bitmap, clarityListener);
+            opencv.changeClaritySync(bitmap, coefficient, clarityListener);
         }
     }
 
@@ -439,12 +463,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 bitmap = targetBitmap;
             } else {
 
-                bitmap = BitmapFactory.decodeFile(imgChoosePath);
+                bitmap = getFileToBitmap();
             }
             return bitmap;
         } else {
 
             myToast(getString(R.string.img_is_null));
+            return null;
+        }
+    }
+
+    private Bitmap getFileToBitmap() {
+
+        if ( hasImage() ) {
+
+            return BitmapFactory.decodeFile(imgChoosePath);
+        } else {
+
             return null;
         }
     }

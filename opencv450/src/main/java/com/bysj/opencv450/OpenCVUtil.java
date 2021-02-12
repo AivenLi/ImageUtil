@@ -20,7 +20,7 @@ public class OpenCVUtil {
      * 加载C++库
      */
     static {
-        System.loadLibrary("native-lib");
+        System.loadLibrary("ienhance");
     }
 
     /**
@@ -214,11 +214,22 @@ public class OpenCVUtil {
     }
 
     /**
-     * 增强图片清晰度
+     * 自适应增强图片清晰度，同步
      * @param bitmap 原图
      * @return 增强之后的图
      */
     public Bitmap changeClarity(Bitmap bitmap) {
+
+        return changeClarity(bitmap, 1);
+    }
+
+    /**
+     * 增强图片清晰度，同步。
+     * @param bitmap 原图
+     * @param coefficient 系数
+     * @return 处理之后的图
+     */
+    public Bitmap changeClarity(Bitmap bitmap, float coefficient) {
 
         /**
          * 创建图片矩阵对象
@@ -227,7 +238,7 @@ public class OpenCVUtil {
         /**
          * 调用C++库，自适应增强对比度算法
          */
-        int[] resultMatrix = changeClarity(pictureMatrix.getMatrix(), pictureMatrix.getWidth(), pictureMatrix.getHeight());
+        int[] resultMatrix = changeClarity(pictureMatrix.getMatrix(), pictureMatrix.getWidth(), pictureMatrix.getHeight(), coefficient);
         /**
          * 保存结果
          */
@@ -239,11 +250,22 @@ public class OpenCVUtil {
     }
 
     /**
-     * 增强图片清晰度，异步
+     * 增强图片清晰度，异步。自适应
      * @param bitmap 原图
      * @param listener 回调
      */
     public void changeClaritySync(Bitmap bitmap, HandleImageListener listener) {
+
+        changeClaritySync(bitmap, 1, listener);
+    }
+
+    /**
+     * 增强图片清晰度，异步。
+     * @param bitmap 原图
+     * @param coefficient 系数
+     * @param listener 回调
+     */
+    public void changeClaritySync(Bitmap bitmap, float coefficient, HandleImageListener listener) {
 
         new Thread(new Runnable() {
             @Override
@@ -256,7 +278,7 @@ public class OpenCVUtil {
                 /**
                  * 调用C++库，自适应增强对比度算法
                  */
-                int[] resultMatrix = changeClarity(pictureMatrix.getMatrix(), pictureMatrix.getWidth(), pictureMatrix.getHeight());
+                int[] resultMatrix = changeClarity(pictureMatrix.getMatrix(), pictureMatrix.getWidth(), pictureMatrix.getHeight(), coefficient);
                 /**
                  * 保存结果
                  */
@@ -271,7 +293,6 @@ public class OpenCVUtil {
             }
         }).start();
     }
-
 
     /**
      * 检查对比度系数，如果系数不在范围内，则调整系数至极限值：[0.01, 0.9]
@@ -324,5 +345,13 @@ public class OpenCVUtil {
      */
     private native int[] changeSaturation(int[] matrix, int width, int height, float coefficient);
 
-    private native int[] changeClarity(int[] matrix, int width, int height);
+    /**
+     * 连接C++库方法，调整清晰度
+     * @param matrix 图片矩阵
+     * @param width 图片宽度
+     * @param height 图片高度
+     * @param coefficient 增强系数
+     * @return 修改之后的图片矩阵
+     */
+    private native int[] changeClarity(int[] matrix, int width, int height, float coefficient);
 }

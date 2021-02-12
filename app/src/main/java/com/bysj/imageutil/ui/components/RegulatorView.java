@@ -223,7 +223,21 @@ public class RegulatorView extends View {
                 }
             }
         }
+        invalidate();
+    }
 
+    public void setCurrentValue(float currentValue, boolean callback) {
+
+        this.currentValue = Math.min(currentValue, maxValue);
+        this.currentValue = Math.max(this.currentValue, minValue);
+        this.currentValue = Math.round(this.currentValue);
+        if ( callback ) {
+
+            if ( onValueChangeListener != null ) {
+
+                onValueChangeListener.onValueChange(this.currentValue);
+            }
+        }
         invalidate();
     }
 
