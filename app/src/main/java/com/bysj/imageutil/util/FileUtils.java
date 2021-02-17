@@ -1,8 +1,22 @@
 package com.bysj.imageutil.util;
 
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.widget.Toast;
+
+import com.bysj.imageutil.R;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -62,6 +76,90 @@ public class FileUtils {
                 } catch (Exception e) {
 
                     e.printStackTrace();
+                    if ( listener != null ) {
+
+                        listener.failure(e.toString());
+                    }
+                }
+            }
+        }).start();
+    }
+
+    private static final String GALLERY_NAME = "IEnhance";
+    private static boolean saving = false;
+    public interface SaveImageListener {
+
+        void success(String filePath);
+        void failure(String error);
+    }
+
+    /**
+     * 保存图片到系统图库
+     * @param context 上下文
+     * @param bmp 原图
+     * @param listener 执行结果回调
+     */
+    public static void saveImageToGallery(Context context, Bitmap bmp, SaveImageListener listener) {
+
+        /**
+         * 如果已经有一个任务在执行了，则直接返回
+         */
+        if ( saving ) {
+
+            if ( listener != null ) {
+
+                listener.failure("正在保存其他图片，请稍后再试");
+            }
+            return;
+        }
+        saving = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                /**
+                 * 创建文件
+                 */
+                File appDir = new File(Environment.getExternalStorageDirectory(), GALLERY_NAME);
+
+                /**
+                 * 创建目录，如果不存在的话
+                 */
+                if (!appDir.exists()) {
+
+                    appDir.mkdir();
+                }
+
+                /**
+                 * 设置文件名
+                 */
+                String fileName = System.currentTimeMillis() + ".jpg";
+                File file = new File(appDir, fileName);
+                try {
+
+                    /**
+                     * 写入文件
+                     */
+                    FileOutputStream fos = new FileOutputStream(file);
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                    fos.flush();
+                    fos.close();
+                    MediaStore.Images.Media.insertImage(context.getContentResolver(),
+                            file.getAbsolutePath(), fileName, null);
+                    /**
+                     * 通知系统图库更新
+                     */
+                    String[] paths = new String[]{file.getAbsolutePath()};
+                    MediaScannerConnection.scanFile(context, paths, null, null);
+                    saving = false;
+                    if ( listener != null ) {
+
+                        listener.success(file.getAbsolutePath());
+                    }
+                } catch (IOException e) {
+
+                    e.printStackTrace();
+                    saving = false;
                     if ( listener != null ) {
 
                         listener.failure(e.toString());

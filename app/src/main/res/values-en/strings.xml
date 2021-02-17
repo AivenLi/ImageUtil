@@ -19,7 +19,9 @@
     <string name="loading_text">Loading…</string>
     <string name="handing">Processing</string>
     <string name="reduction">Reduction</string>
+    <string name="adaptive">Adaptive enhancement</string>
     <string name="save_image">Save</string>
+    <string name="saved">Saved to gallery“%1$s”</string>
     <string name="yes">Yes</string>
     <string name="cancel">Cancel</string>
 </resources>

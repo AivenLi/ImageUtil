@@ -80,7 +80,7 @@
 
 >>### 4. 模块调用示意图
 
-![模块调用示意图](https://www.slwolf.com/img/android_module_call_prompt.png "模块调用示意图")
+![模块调用示意图](https://github.com/AivenLi/ImageUtil/blob/main/document/image/android_module_call_prompt.png "模块调用示意图")
 
 >>### 3. 方案优势
 

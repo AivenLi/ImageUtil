@@ -184,10 +184,10 @@ public class RegulatorView extends View {
         mPaint.setColor(Color.parseColor(txtColor));
         float x=getPaddingLeft()+BTN_RADIUS;
         float y=mPaint.getTextSize();
-        canvas.drawText(minValue+"",x,y,mPaint);
+        //canvas.drawText(minValue+"",x,y,mPaint);
         float textWidth = mBound.width();
         x=getWidth()-getPaddingRight()-BTN_RADIUS-textWidth;
-        canvas.drawText(maxValue+"",x,y,mPaint);
+        //canvas.drawText(maxValue+"",x,y,mPaint);
         if(maxValue!=minValue)//处理最大和最小值相等的情况
             x=getBarWidth()*(currentValue-minValue)/(maxValue-minValue)+getPaddingLeft()+BTN_RADIUS*2;
         else x=getBarWidth()+getPaddingLeft()+BTN_RADIUS*2;

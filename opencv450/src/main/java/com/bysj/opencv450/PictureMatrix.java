@@ -42,9 +42,7 @@ public class PictureMatrix {
 
     public Bitmap toBitmap() {
 
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-        bitmap.setPixels(matrix, 0, width, 0, 0, width, height);
-        return bitmap;
+        return toBitmap(Bitmap.Config.RGB_565);
     }
 
     public Bitmap toBitmap(Bitmap.Config config) {

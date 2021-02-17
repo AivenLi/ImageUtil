@@ -34,6 +34,7 @@ import com.bysj.imageutil.util.IntentKeys;
 import com.bysj.imageutil.util.LogCat;
 import com.bysj.opencv450.HandleImageListener;
 import com.bysj.opencv450.OpenCVUtil;
+import com.bysj.opencv450.PictureMatrix;
 
 
 import java.io.File;
@@ -42,11 +43,9 @@ import java.util.Objects;
 public class MainActivity extends BaseActivity implements View.OnClickListener{
 
     /** 日志标志 */
-    private static final String TAG            = "mainActivity";
+    private static final String TAG                 = "mainActivity";
     /** 源图片控件 */
     private ImageView           mImgSource;
-    /** 修改后图片控件 */
-    private ImageView           mImgTarget;
     /** 提示添加图片控件 */
     private LinearLayout        mLytAddImgPrompt;
     /** 调整图片控制面板 */
@@ -57,11 +56,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     private RegulatorView       mRglContrast;
     /** 饱和度调节器 */
     private RegulatorView       mRglSaturation;
+    /** 一键自适应 */
+    private TextView            mTvAdaptive;
     /** 保存图片按钮 */
     private TextView            mTvSave;
     /** 还原图片 */
     private TextView            mTvReduction;
-
     /** 再按一次退出程序 */
     private long                exitTime            = 0;
     /** 选取图片后图片副本的固定路径 */
@@ -76,10 +76,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     private float               saturationValue     = 0.0f;
     /** 是否正在处理图片 */
     private boolean             isHandling          = false;
+    /** 如果处理完图片，则需要用户确认是否使用
+     * 处理后的图片。如果不确认，调整图片时是在原图
+     * 的基础上进行调整
+     */
+    private boolean             useResultImg        = false;
     /** OpenCV工具 */
     private OpenCVUtil          opencv;
     /** 处理后的图片 */
     private Bitmap              targetBitmap        = null;
+    /** 确认使用处理后的图片 */
+    private Bitmap              useBitmap           = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,12 +109,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     protected void initView() {
 
         mImgSource       = findViewById(R.id.img_source);
-        mImgTarget       = findViewById(R.id.img_target);
         mLytAddImgPrompt = findViewById(R.id.lyt_add_image_prompt);
         mRglClarity      = findViewById(R.id.rgl_clarity);
         mRglContrast     = findViewById(R.id.rgl_contrast);
         mRglSaturation   = findViewById(R.id.rgl_saturation);
         mLytController   = findViewById(R.id.lyt_controller);
+        mTvAdaptive      = findViewById(R.id.tv_adaptive);
         mTvSave          = findViewById(R.id.tv_save);
         mTvReduction     = findViewById(R.id.tv_reduction);
 
@@ -119,8 +126,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     protected void setViewOnClick() {
 
         mImgSource.setOnClickListener(this);
-        mImgTarget.setOnClickListener(this);
         mLytAddImgPrompt.setOnClickListener(this);
+        mTvAdaptive.setOnClickListener(this);
         mTvSave.setOnClickListener(this);
         mTvReduction.setOnClickListener(this);
     }
@@ -130,31 +137,110 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
         int id = view.getId();
 
-        if ( id == R.id.img_source || id == R.id.img_target || id == R.id.lyt_add_image_prompt ) {
+        if ( id == R.id.img_source || id == R.id.lyt_add_image_prompt ) {
 
-            chooseImg();
-        } else if ( id == R.id.tv_save ) {
+            if ( isHandling ) {
 
-            //handleImg();
-        } else if ( id == R.id.tv_reduction ) {
-
-            targetBitmap = getFileToBitmap();
-            if ( targetBitmap == null ) {
-
-                myToast(getString(R.string.img_is_null));
+                myToast(getString(R.string.handing));
             } else {
 
-                tempSetImageSource(targetBitmap);
-                saturationValue = 50.0f;
-                clarityValue    = 50.0f;
-                contrastValue   = 50.0f;
-                /**
-                 * 将调整的参数复原，不回调
-                 */
-                mRglSaturation.setCurrentValue(saturationValue, false);
-                mRglContrast.setCurrentValue(contrastValue, false);
-                mRglClarity.setCurrentValue(clarityValue, false);
+                chooseImg();
             }
+        } else if ( id == R.id.tv_save ) {
+
+            String sAction = mTvSave.getText().toString();
+            if ( sAction.equals(getString(R.string.save_image)) ) {
+
+                if ( isHandling ) {
+
+                    myToast(getString(R.string.handing));
+                } else {
+
+                    if ( targetBitmap == null ) {
+
+                        myToast(getString(R.string.img_is_null));
+                        return;
+                    }
+
+                    /**
+                     * 保存图片到系统图库
+                     */
+                    FileUtils.saveImageToGallery(mContext, targetBitmap, new FileUtils.SaveImageListener() {
+                        @Override
+                        public void success(String filePath) {
+
+                            sendMessage(HandleKeys.SAVE_IMAGE_SUCCESS, filePath);
+                        }
+
+                        @Override
+                        public void failure(String error) {
+
+                            sendMessage(HandleKeys.SAVE_IMAGE_FAILURE, error);
+                        }
+                    });
+                }
+            } else {
+
+                useResultImg = false;
+                useBitmap = targetBitmap;
+                setBtnAction(useResultImg);
+                resetImgParam();
+            }
+        } else if ( id == R.id.tv_reduction ) {
+
+            String tCancel = mTvReduction.getText().toString();
+            if ( tCancel.equals(getString(R.string.cancel)) ) {
+
+                targetBitmap = useBitmap;
+                if ( targetBitmap == null ) {
+
+                    targetBitmap = getFileToBitmap();
+                }
+                useResultImg = false;
+                loadImage();
+                resetImgParam();
+                setBtnAction(useResultImg);
+            } else if ( !isHandling ) {
+
+                targetBitmap = getFileToBitmap();
+                useBitmap = targetBitmap;
+                if (targetBitmap == null) {
+
+                    myToast(getString(R.string.img_is_null));
+                } else {
+
+                    loadImage();
+                    resetImgParam();
+                }
+            } else {
+
+                myToast(getString(R.string.handing));
+            }
+        } else if ( id == R.id.tv_adaptive ) {
+
+            /**
+             * 一键自适应调整
+             */
+            if ( isHandling ) {
+
+                myToast(getString(R.string.handing));
+                return;
+            }
+            Bitmap bitmap = getFileToBitmap();
+            if ( bitmap == null ) {
+
+                myToast(getString(R.string.img_is_null));
+                return;
+            }
+            isHandling = true;
+            showLoading();
+            opencv.adaptiveEnhanceSync(bitmap, new HandleImageListener() {
+                @Override
+                public void done(Bitmap bitmap) {
+
+                    sendMessage(HandleKeys.ENHANCE_ADAPTIVE_DONE, bitmap);
+                }
+            });
         }
     }
 
@@ -173,7 +259,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             if ( requestCode == IntentKeys.MAIN_TO_PHOTOS ) {
 
                 targetBitmap = null;
-                mImgTarget.setVisibility(View.GONE);
                 String path = GetImgPath.getPath(mContext, data.getData());
                 if ( !TextUtils.isEmpty(path) ) {
 
@@ -197,11 +282,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             /**
              * 相机
              */
-            if ( requestCode == IntentKeys.MAIN_TO_CAMERA ) {
+            else if ( requestCode == IntentKeys.MAIN_TO_CAMERA ) {
 
                 targetBitmap = null;
-                mImgTarget.setVisibility(View.GONE);
                 setShowImage(true);
+                resetImgParam();
             }
         }
     }
@@ -215,42 +300,28 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             imgChoosePath = (String)msg.obj;
             LogCat.d(TAG + "获取成功", imgChoosePath);
             setShowImage(true);
+            resetImgParam();
         } else if ( what == HandleKeys.COPY_FILE_FAILURE ) {
 
             LogCat.d(TAG + "获取失败", (String)msg.obj);
-        } else if ( what == HandleKeys.ENHANCE_CONTRAST_DONE ) {
+        } else if ( what == HandleKeys.ENHANCE_CONTRAST_DONE ||
+                    what == HandleKeys.ENHANCE_SATURATION_DONE ||
+                    what == HandleKeys.ENHANCE_CLARITY_DONE ||
+                    what == HandleKeys.ENHANCE_ADAPTIVE_DONE ) {
 
+            isHandling = false;
+            useResultImg = true;
             hideLoading();
-            isHandling = false;
-            targetBitmap = (Bitmap)msg.obj;
-            tempSetImageSource(targetBitmap);
-        } else if ( what == HandleKeys.ENHANCE_SATURATION_DONE ) {
+            targetBitmap = (Bitmap) msg.obj;
+            loadImage();
+            setBtnAction(useResultImg);
+        } else if ( what == HandleKeys.SAVE_IMAGE_SUCCESS ) {
 
-            hideLoading();
-            isHandling = false;
-            targetBitmap = (Bitmap)msg.obj;
-            tempSetImageSource(targetBitmap);
-        } else if ( what == HandleKeys.ENHANCE_CLARITY_DONE ) {
+            Toast.makeText(mContext, getString(R.string.saved, (String)msg.obj), Toast.LENGTH_SHORT).show();
+        } else if ( what == HandleKeys.SAVE_IMAGE_FAILURE ) {
 
-            hideLoading();;
-            isHandling = false;
-            targetBitmap = (Bitmap)msg.obj;
-            tempSetImageSource(targetBitmap);
+            Toast.makeText(mContext, "保存失败：" + (String)msg.obj, Toast.LENGTH_LONG).show();
         }
-    }
-
-    /**
-     * 项目快完工时不再需要本方法。
-     * 项目还没有全部完成，后面可能还有一些细节要调整，先用该方法来展示结果。
-     * @param bitmap
-     */
-    private void tempSetImageSource(Bitmap bitmap) {
-
-        mImgTarget.setVisibility(View.VISIBLE);
-        Glide.with(mImgTarget.getContext())
-                .load(bitmap)
-                .placeholder(android.R.color.darker_gray)
-                .into(mImgTarget);
     }
 
     @Override
@@ -264,6 +335,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     }
 
     /**
+     * 复位图片参数
+     */
+    private void resetImgParam() {
+
+        saturationValue = 50.0f;
+        clarityValue    = 50.0f;
+        contrastValue   = 50.0f;
+        /**
+         * 将调整的参数复原，不回调
+         */
+        mRglSaturation.setCurrentValue(saturationValue, false);
+        mRglContrast.setCurrentValue(contrastValue, false);
+        mRglClarity.setCurrentValue(clarityValue, false);
+    }
+
+    /**
      * 如果用户添加了图片，则显示图片，如果没有添加，则提示添加
      * @param hasImg
      */
@@ -271,6 +358,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
         if ( !hasImg ) {
 
+            mTvAdaptive.setVisibility(View.GONE);
             mTvSave.setVisibility(View.GONE);
             mTvReduction.setVisibility(View.GONE);
             mImgSource.setVisibility(View.GONE);
@@ -278,6 +366,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             mLytAddImgPrompt.setVisibility(View.VISIBLE);
         } else {
 
+            mTvAdaptive.setVisibility(View.VISIBLE);
             mTvSave.setVisibility(View.VISIBLE);
             mTvReduction.setVisibility(View.VISIBLE);
             mImgSource.setVisibility(View.VISIBLE);
@@ -288,15 +377,41 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     }
 
     /**
+     * 如果是刚处理完图片，则需要确认是否更改图片。
+     * @param showSaveAndReduction 是否显示“保存图片和还原”
+     */
+    private void setBtnAction(boolean showSaveAndReduction) {
+
+        if ( showSaveAndReduction ) {
+
+            mTvSave.setText(getString(R.string.yes));
+            mTvReduction.setText(getString(R.string.cancel));
+        } else {
+
+            mTvSave.setText(getString(R.string.save_image));
+            mTvReduction.setText(getString(R.string.reduction));
+        }
+    }
+
+    /**
      * 将图片显示到UI
      */
     private void loadImage() {
 
         GlideUtil.clearDiskCache(mContext);
-        Glide.with(mImgSource.getContext())
-                .load(imgChoosePath)
-                .placeholder(android.R.color.darker_gray)
-                .into(mImgSource);
+        if ( targetBitmap == null ) {
+
+            Glide.with(mImgSource.getContext())
+                    .load(imgChoosePath)
+                    .placeholder(android.R.color.darker_gray)
+                    .into(mImgSource);
+        } else {
+
+            Glide.with(mImgSource.getContext())
+                    .load(targetBitmap)
+                    .placeholder(android.R.color.darker_gray)
+                    .into(mImgSource);
+        }
         clearCacheCapture(imgChoosePath);
     }
 
@@ -314,13 +429,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         mRglClarity.setShowText(true);
         mRglClarity.setCanAdjust(true);
         mRglClarity.setChangingCallback(false);
+        mRglClarity.setCurrentValue(0.0f, false);
 
         mRglSaturation.setOnValueChangeListener(new RegulatorView.OnValueChangeListener() {
             @Override
             public void onValueChange(float value) {
 
                 saturationValue = value;
-                changeSaturation(saturationValue+50.0f, false);
+                changeSaturation(saturationValue+30, false);
             }
         });
         mRglContrast.setOnValueChangeListener(new RegulatorView.OnValueChangeListener() {
@@ -335,7 +451,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             @Override
             public void onValueChange(float value) {
 
-                clarityValue = value;
+                clarityValue = value - 50.00f;
                 enhanceClarity(clarityValue / 10.0f);
             }
         });
@@ -395,7 +511,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     }
 
     /**
-     * 增强对比图处理
+     * 增强饱和度处理
      * @param coefficient 增强系数
      * @param adaptive 是否自适应
      */
@@ -446,6 +562,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         }
     }
 
+    /**
+     * 处理图片时调用本方法，本方法返回将要被处理的图片
+     * @return Bitmap 将被处理的图片
+     */
     private Bitmap getTargetBitmap() {
 
         if ( hasImage() ) {
