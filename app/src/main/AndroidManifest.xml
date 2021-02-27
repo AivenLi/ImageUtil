@@ -38,12 +38,6 @@
         </activity>
 
         <activity android:name=".ui.activity.MainActivity" />
-
-        <!-- 配置图片选择Activity -->
-        <activity
-            android:name="com.yalantis.ucrop.UCropActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 
 </manifest>

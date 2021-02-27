@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/tab_ienhance"
+        android:title="@string/i_enhance"
+        android:icon="@mipmap/bottom_left_icon" />
+    <item android:id="@+id/tab_iedit"
+        android:title="@string/i_prune"
+        android:icon="@mipmap/bottom_right_icon" />
+</menu>

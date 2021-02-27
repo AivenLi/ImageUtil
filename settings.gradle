@@ -1,3 +1,4 @@
+include ':imgEvaluation'
 include ':opencv450'
 //include ':opencv'
 include ':app'

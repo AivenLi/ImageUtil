@@ -41,7 +41,13 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(saveInstanceState);
         getWindow().setBackgroundDrawable(null);
         //始终保持竖屏
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        try {
+
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
         /**
          * 这一句是为了让有的Activity可以全屏，该语句必须在setContentView之前，
          * 在引入SmartSwipe之后下面这一句导致app闪退，我怀疑是因为SmartSwipe

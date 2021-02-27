@@ -24,4 +24,10 @@
     <string name="saved">Saved to gallery“%1$s”</string>
     <string name="yes">Yes</string>
     <string name="cancel">Cancel</string>
+
+    <string name="i_enhance">IEnhance</string>
+    <string name="i_prune">Prune</string>
+    <string name="i_evaluation">Evaluation</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
