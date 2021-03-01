@@ -32,6 +32,7 @@ import com.bysj.imageutil.ui.components.RegulatorView;
 import com.bysj.imageutil.ui.components.dialog.DialogLoading;
 import com.bysj.imageutil.ui.components.dialog.DialogPrompt;
 import com.bysj.imageutil.ui.components.dialog.DialogPromptListener;
+import com.bysj.imageutil.ui.fragment.EvaluatFragment;
 import com.bysj.imageutil.ui.fragment.IEditFragment;
 import com.bysj.imageutil.ui.fragment.IEnhanceFragment;
 import com.bysj.imageutil.ui.fragment.TabFragment;
@@ -42,6 +43,7 @@ import com.bysj.imageutil.util.HandleKeys;
 import com.bysj.imageutil.util.IntentKeys;
 import com.bysj.imageutil.util.LogCat;
 import com.bysj.imgevaluation.EvaluatUtil;
+import com.bysj.imgevaluation.bean.EvaluatBean;
 import com.bysj.imgevaluation.listener.EvaluatAllListener;
 import com.bysj.opencv450.HandleImageListener;
 import com.bysj.opencv450.OpenCVUtil;
@@ -56,16 +58,25 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class MainActivity extends BaseActivity implements View.OnClickListener, BottomNavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends BaseActivity implements View.OnClickListener,
+        BottomNavigationView.OnNavigationItemSelectedListener,
+        IEnhanceFragment.ImageChangedListener {
 
     /** 日志标志 */
-    private static final String TAG                 = "mainActivity";
+    private static final String TAG                   = "mainActivity";
     /** Fragment列表 */
     private ArrayList<Fragment> fragments;
+    /**
+     * 本Activity装载两个Fragment，而第一个Fragment（TabFragment）
+     * 又装载两个Fragment（分别是IEnhanceFragment和EvaluatFragment），
+     * 这两个Fragment需要通信，因此使用本Activity作为通信桥梁，
+     * 故在此创建这两个Fragment的实例。
+     */
+    private ArrayList<Fragment> tabFragments;
     /** 当前页 */
     private int                 currentPage;
     /** 再按一次退出程序 */
-    private long                exitTime            = 0;
+    private long                exitTime              = 0;
     /** Bottom tab */
     BottomNavigationView        bottomNavigationView;
 
@@ -75,9 +86,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         super.onCreate(savedInstanceState);
 
         fragments = new ArrayList<>();
-        fragments.add(new TabFragment());
+        tabFragments = new ArrayList<>();
+        tabFragments.add(new IEnhanceFragment());
+        tabFragments.add(new EvaluatFragment());
+        fragments.add(new TabFragment(tabFragments));
         fragments.add(new IEditFragment());
-
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.layout_content, fragments.get(0))
                 .commitAllowingStateLoss();
@@ -140,13 +153,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     @Override
     public void onClick(View view) {
 
-        int id = view.getId();
     }
 
     @Override
     protected void onHandleMessage(final Message msg) {
 
-        int what = msg.what;
     }
 
     @Override
@@ -157,6 +168,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
             return false;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public void imgChanged(Bitmap bitmap) {
+
+        LogCat.d(TAG, "Fragment回调");
+        EvaluatFragment fragment = (EvaluatFragment)tabFragments.get(1);
+        fragment.imgChanged(bitmap);
+    }
+
+    @Override
+    public void enhancedImage(ArrayList<EvaluatBean> evaluatBeans) {
+
     }
 
     /**

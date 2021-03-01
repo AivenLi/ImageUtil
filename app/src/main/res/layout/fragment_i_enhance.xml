@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.fragment.IEnhanceFragment"
     android:background="@drawable/splash_bg"
+    android:id="@+id/fragment_i_enhance"
     >
     <LinearLayout
         android:layout_width="match_parent"

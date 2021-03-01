@@ -1,5 +1,7 @@
 package com.bysj.imageutil.ui.fragment;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -38,6 +40,7 @@ import com.bysj.imageutil.util.HandleKeys;
 import com.bysj.imageutil.util.IntentKeys;
 import com.bysj.imageutil.util.LogCat;
 import com.bysj.imgevaluation.EvaluatUtil;
+import com.bysj.imgevaluation.bean.EvaluatBean;
 import com.bysj.imgevaluation.listener.EvaluatAllListener;
 import com.bysj.opencv450.HandleImageListener;
 import com.bysj.opencv450.OpenCVUtil;
@@ -104,6 +107,30 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
         // Required empty public constructor
     }
 
+    /**
+     * 源图片改变，图片增强后通知承载本Fragment的Activity接口。
+     */
+    public interface ImageChangedListener {
+
+        void imgChanged(Bitmap bitmap);
+        void enhancedImage(ArrayList<EvaluatBean> evaluatBeans);
+    }
+
+    ImageChangedListener mCallback;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+
+        super.onAttach(context);
+
+        try {
+
+            mCallback = (ImageChangedListener)context;
+        } catch (ClassCastException e) {
+
+            throw new ClassCastException(context.toString() + " must implement ImageChandedListener");
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -362,6 +389,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
                     });
                 }
             }
+
             /**
              * 相机
              */
@@ -370,6 +398,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
                 targetBitmap = null;
                 setShowImage(true);
                 resetImgParam();
+                mCallback.imgChanged(getFileToBitmap());
             }
         }
     }

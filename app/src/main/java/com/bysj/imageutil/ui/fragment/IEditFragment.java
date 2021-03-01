@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import com.bysj.imageutil.R;
 import com.bysj.imageutil.base.BaseFragment;
+import com.bysj.imageutil.util.LogCat;
 
 /**
  * 图片拼接啥的Fragment
@@ -20,6 +21,7 @@ import com.bysj.imageutil.base.BaseFragment;
 
 public class IEditFragment extends BaseFragment {
 
+    private static final String TAG = "iEditFragment";
 
     public IEditFragment() {
         // Required empty public constructor
@@ -47,5 +49,10 @@ public class IEditFragment extends BaseFragment {
     @Override
     protected void onHandleMessage(Message msg) {
 
+    }
+
+    public void test() {
+
+        LogCat.d(TAG, "回调接收成功");
     }
 }

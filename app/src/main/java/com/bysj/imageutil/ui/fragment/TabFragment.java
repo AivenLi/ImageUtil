@@ -42,12 +42,15 @@ public class TabFragment extends Fragment {
         // Required empty public constructor
     }
 
+    public TabFragment(ArrayList<Fragment> fragments) {
+
+        this.fragments = fragments;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        fragments.add(new IEnhanceFragment());
-        fragments.add(new EvaluatFragment());
     }
 
     @Override
