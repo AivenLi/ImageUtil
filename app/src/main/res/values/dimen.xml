@@ -8,7 +8,9 @@
     <dimen name="dialog_content">16sp</dimen>
     <dimen name="dialog_yes_cancel">14sp</dimen>
     <dimen name="add_image_prompt">20sp</dimen>
-    <dimen name="image_param">18sp</dimen>
+    <dimen name="image_param_edit">18sp</dimen>
     <dimen name="save_image">18sp</dimen>
+    <dimen name="image_param_text">12sp</dimen>
+    <dimen name="image_crop">14sp</dimen>
 
 </resources>

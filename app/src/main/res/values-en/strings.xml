@@ -31,6 +31,10 @@
     <string name="img_source">Original image</string>
     <string name="img_source_param">Original image parameters</string>
     <string name="img_enhance_param">Enhanced parameters</string>
+    <string name="img_handle_param">Calculating the enhanced data</string>
+    <string name="img_crop_4">4 sheets</string>
+    <string name="img_crop_6">6 sheets</string>
+    <string name="img_crop_9">9 sheets</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

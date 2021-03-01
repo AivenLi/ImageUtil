@@ -84,4 +84,7 @@ dependencies {
     // 底部tab
     implementation 'androidx.navigation:navigation-fragment:2.2.2'
     implementation 'androidx.navigation:navigation-ui:2.2.2'
+
+    // 轮播
+    //implementation 'com.youth.banner:banner:2.0.7'
 }

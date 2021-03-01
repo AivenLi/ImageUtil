@@ -10,29 +10,36 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center"
+        android:visibility="gone"
         >
         <TextView
             android:id="@+id/tv_dimension_key"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="对比度: "
-            android:textSize="28sp"
-            android:textColor="@color/deepSkyBlue"
+            android:textSize="@dimen/image_param_text"
+            android:textColor="@color/white"
             />
         <TextView
             android:id="@+id/tv_dimension_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="56.6"
-            android:textSize="14sp"
+            android:textSize="@dimen/image_param_text"
             android:textColor="@color/white"
             />
     </LinearLayout>
     <ImageView
-        android:layout_marginTop="2dp"
         android:id="@+id/img_img"
         android:layout_width="match_parent"
         android:layout_height="300dp"
+        />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="50dp"
+        android:layout_marginLeft="50dp"
+        android:background="@color/gray"
         />
 </LinearLayout>

@@ -74,7 +74,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/contrast_ratio"
                     android:gravity="center"
-                    android:textSize="@dimen/image_param"
+                    android:textSize="@dimen/image_param_edit"
                     android:textColor="@color/add_image_prompt"
                     />
                 <com.bysj.imageutil.ui.components.RegulatorView
@@ -95,7 +95,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/clarity"
                     android:gravity="center"
-                    android:textSize="@dimen/image_param"
+                    android:textSize="@dimen/image_param_edit"
                     android:textColor="@color/add_image_prompt"
                     />
                 <com.bysj.imageutil.ui.components.RegulatorView
@@ -116,7 +116,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/saturation"
                     android:gravity="center"
-                    android:textSize="@dimen/image_param"
+                    android:textSize="@dimen/image_param_edit"
                     android:textColor="@color/add_image_prompt"
                     />
                 <com.bysj.imageutil.ui.components.RegulatorView

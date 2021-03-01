@@ -20,6 +20,7 @@ public class OpenCVUtil {
      * 加载C++库
      */
     static {
+
         System.loadLibrary("ienhance");
     }
 

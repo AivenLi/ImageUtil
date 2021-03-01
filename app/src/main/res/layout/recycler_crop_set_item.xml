@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    >
+    <TextView
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:id="@+id/tv_crop"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:text="@string/img_crop_4"
+        android:textSize="@dimen/image_crop"
+        android:textColor="@color/deepSkyBlue"
+        android:background="@drawable/blue_line_border"
+        android:gravity="center"
+        />
+</LinearLayout>

@@ -179,6 +179,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         evaluatFragment.imgChanged(evaluatBeans, isSource);
     }
 
+    @Override
+    public void startDetectImgParam() {
+
+        evaluatFragment.startDetectAllParam();
+    }
+
     /**
      * 再按一次退出程序
      */

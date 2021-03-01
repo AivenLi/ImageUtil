@@ -32,6 +32,10 @@
     <string name="img_source">原图</string>
     <string name="img_source_param">原图参数</string>
     <string name="img_enhance_param">增强参数</string>
+    <string name="img_handle_param">正在计算增强后的各项数据</string>
+    <string name="img_crop_4">4张</string>
+    <string name="img_crop_6">6张</string>
+    <string name="img_crop_9">9张</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

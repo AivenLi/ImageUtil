@@ -20,6 +20,14 @@ public class PictureMatrix {
         bitmap.getPixels(matrix, 0, width, 0, 0, width, height);
     }
 
+    public PictureMatrix(Bitmap bitmap, int startX, int startY, int endX, int endY) {
+
+        width = Math.abs(endX - startX);
+        height = Math.abs(endY - startY);
+        matrix = new int[width * height];
+        //bitmap.getPixel(matrix, startX, )
+    }
+
     public void setMatrix(int[] matrix) {
 
         this.matrix = matrix;

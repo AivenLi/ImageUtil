@@ -59,6 +59,7 @@ import static android.app.Activity.RESULT_OK;
 public class IEnhanceFragment extends BaseFragment implements View.OnClickListener {
 
     private static final String    TAG = "iEnhanceFragment";
+    private static final String    IMG_SUFFIX = "_capture.jpg";
     /** 源图片控件 */
     private ImageView              mImgSource;
     /** 提示添加图片控件 */
@@ -115,8 +116,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
     public interface ImageChangedListener {
 
         void refreshEvaluatFragment(ArrayList<EvaluatBean> evaluatBeans, boolean isSource);
-        //void imgChanged(Bitmap bitmap, boolean isSource);
-        //void enhancedImage(ArrayList<EvaluatBean> evaluatBeans, Bitmap bitmap);
+        void startDetectImgParam();
     }
 
     ImageChangedListener mCallback;
@@ -197,6 +197,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
         int what = msg.what;
         if ( what == HandleKeys.COPY_FILE_SUCCESS ) {
 
+            targetBitmap = null;
             imgChoosePath = (String)msg.obj;
             LogCat.d(TAG + "获取成功", imgChoosePath);
             setShowImage(true);
@@ -345,6 +346,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
             }
             isHandling = true;
             showLoading();
+            mCallback.startDetectImgParam();
             opencv.adaptiveEnhanceSync(bitmap, new HandleImageListener() {
                 @Override
                 public void done(Bitmap bitmap) {
@@ -369,12 +371,11 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
              */
             if ( requestCode == IntentKeys.MAIN_TO_PHOTOS ) {
 
-                targetBitmap = null;
                 String path = GetImgPath.getPath(mContext, data.getData());
                 if ( !TextUtils.isEmpty(path) ) {
 
                     final File file = new File(path);
-                    FileUtils.copyFile(file.getPath(), imgConstantPath + System.currentTimeMillis() + "_capture.jpg", new FileUtils.CopyFileListener() {
+                    FileUtils.copyFile(file.getPath(), imgConstantPath + System.currentTimeMillis() + IMG_SUFFIX, new FileUtils.CopyFileListener() {
                         @Override
                         public void success(String filePath) {
 
@@ -395,11 +396,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
              * 相机
              */
             else if ( requestCode == IntentKeys.MAIN_TO_CAMERA ) {
-                /*
-                targetBitmap = null;
-                setShowImage(true);
-                resetImgParam();
-                mCallback.imgChanged(getFileToBitmap());*/
+
                 sendMessage(HandleKeys.COPY_FILE_SUCCESS, imgChoosePath);
             }
         }
@@ -553,7 +550,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
 
                         //调用系统相机的意图
                         Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        imgChoosePath = imgConstantPath + System.currentTimeMillis() + "_capture.jpg";
+                        imgChoosePath = imgConstantPath + System.currentTimeMillis() + IMG_SUFFIX;
 
                         File file = new File(imgChoosePath);
 
@@ -566,7 +563,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
                     @Override
                     public void cancel() {
 
-                        imgChoosePath = imgConstantPath + System.currentTimeMillis() + "_capture.jpg";
+                        imgChoosePath = imgConstantPath + System.currentTimeMillis() + IMG_SUFFIX;
 
                         File file = new File(imgChoosePath);
                         //调用系统图库的意图
