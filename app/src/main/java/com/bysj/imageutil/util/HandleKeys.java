@@ -10,4 +10,6 @@ public class HandleKeys {
     public static final int ENHANCE_ADAPTIVE_DONE   = 5;
     public static final int SAVE_IMAGE_SUCCESS      = 6;
     public static final int SAVE_IMAGE_FAILURE      = -6;
+    public static final int GET_EVALUAT_SUCCESS     = 7;
+    public static final int GET_EVALUAT_FAILURE     = -7;
 }

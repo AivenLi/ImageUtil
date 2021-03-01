@@ -1,9 +1,14 @@
 package com.bysj.imageutil.adapter;
 
+import android.annotation.SuppressLint;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bysj.imageutil.R;
 import com.bysj.imgevaluation.bean.EvaluatBean;
 
 import java.util.ArrayList;
@@ -41,9 +46,42 @@ public class IEnAdapter extends BaseAdapter {
         return 0;
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
 
-        return null;
+        ViewHolder viewHolder;
+        EvaluatBean evaluatBean = data.get(i);
+
+        if ( view == null ) {
+
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_evaluation, viewGroup, false);
+            viewHolder = new ViewHolder(view);
+            view.setTag(viewHolder);
+        } else {
+
+            viewHolder = (ViewHolder)view.getTag();
+        }
+
+        viewHolder.mTvKey.setText(evaluatBean.getDimension());
+        viewHolder.mTvValue.setText(evaluatBean.getValue() + "");
+        viewHolder.mImg.setImageBitmap(evaluatBean.getNewBitmap());
+
+        return view;
+    }
+
+    class ViewHolder {
+
+        public TextView  mTvKey;
+        public TextView  mTvValue;
+        public ImageView mImg;
+        public int mPosition;
+
+        public ViewHolder(View view) {
+
+            mTvKey   = view.findViewById(R.id.tv_dimension_key);
+            mTvValue = view.findViewById(R.id.tv_dimension_value);
+            mImg     = view.findViewById(R.id.img_img);
+        }
     }
 }

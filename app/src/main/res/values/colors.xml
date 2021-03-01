@@ -9,6 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="red">#ffd81e06</color>
     <color name="add_image_prompt">#ffffffff</color>
+    <color name="gray">#ffededed</color>
 
     <color name="deepSkyBlue">#00bfff</color>
 </resources>

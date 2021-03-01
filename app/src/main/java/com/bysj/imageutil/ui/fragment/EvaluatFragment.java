@@ -12,10 +12,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.bysj.imageutil.R;
 import com.bysj.imageutil.adapter.IEnAdapter;
 import com.bysj.imageutil.base.BaseFragment;
+import com.bysj.imageutil.ui.components.MyListView;
 import com.bysj.imageutil.util.LogCat;
 import com.bysj.imgevaluation.bean.EvaluatBean;
 
@@ -27,24 +29,35 @@ import java.util.ArrayList;
  * Create on 2021-2-27
  */
 
-public class EvaluatFragment extends BaseFragment {
+public class EvaluatFragment extends BaseFragment implements View.OnClickListener {
     /** 本页面标签，调试使用 */
-    private static final String TAG = "evaluatFragment";
+    private static final String    TAG          = "evaluatFragment";
     /** 选择的图片 */
-    private ImageView mImgSource;
-    /** 评价的图片 */
-    private ArrayList<EvaluatBean> evaList = new ArrayList<>();
-    /** 选择的图片 */
-    private Bitmap choosedImg = null;
-    /** 显示图片列表的适配器 */
-    private IEnAdapter mAdapter;
+    private ImageView              mImgSource;
+    /** 增强后的图片 */
+    private ImageView              mImgEnhance;
+    /** 原图参数列表 */
+    private ArrayList<EvaluatBean> mListSource  = new ArrayList<>();
+    /** 增强图片参数列表 */
+    private ArrayList<EvaluatBean> mListEnhance = new ArrayList<>();
+    /** 原图 */
+    private Bitmap                 sourceBmp    = null;
+    /** 增强图 */
+    private Bitmap                 enhanceBmp   = null;
+    /** 显示原图参数列表的适配器 */
+    private IEnAdapter             mSAdapter;
+    private MyListView             mListViewS;
+    /** 显示增强图参数列表的适配器 */
+    private IEnAdapter             mEAdapter;
+    private MyListView             mListViewE;
     /**
      * 本页面是否创建完成。
      * 该标志位很重要，当收到来自另一个页面的消息时，
      * 需要判断本页面是否创建完成，必须创建完成才能显示
      * 数据（图片等）。
      */
-    private boolean onCreated = false;
+    private boolean                onCreated   = false;
+    /** 标记原图参数列表的状态：展开/折叠 */
 
     public EvaluatFragment() {
         // Required empty public constructor
@@ -63,8 +76,25 @@ public class EvaluatFragment extends BaseFragment {
          * Inflate the layout for this fragment
          */
         View view = inflater.inflate(R.layout.fragment_evaluat, container, false);
-
-        mImgSource = view.findViewById(R.id.img_test);
+        /**
+         * 初始化控件
+         */
+        mImgSource  = view.findViewById(R.id.img_source);
+        mListViewS  = view.findViewById(R.id.list_source);
+        mImgEnhance = view.findViewById(R.id.img_enhance);
+        mListViewE  = view.findViewById(R.id.list_enhance);
+        //mListViewE.setNestedScrollingEnabled(true);
+        //mListViewS.setNestedScrollingEnabled(true);
+        /**
+         * 初始化适配器数据
+         */
+        mSAdapter   = new IEnAdapter(mListSource);
+        mEAdapter   = new IEnAdapter(mListEnhance);
+        mListViewS.setAdapter(mSAdapter);
+        mListViewE.setAdapter(mEAdapter);
+        /**
+         * 设置点击事件
+         */
 
         return view;
     }
@@ -84,6 +114,12 @@ public class EvaluatFragment extends BaseFragment {
     }
 
     @Override
+    public void onClick(View view) {
+
+        int id = view.getId();
+    }
+
+    @Override
     protected void onHandleMessage(Message msg) {
 
     }
@@ -92,27 +128,35 @@ public class EvaluatFragment extends BaseFragment {
 
         if ( onCreated ) {
 
-            if ( choosedImg != null ) {
+            if ( sourceBmp != null ) {
 
-                mImgSource.setImageBitmap(choosedImg);
+                mImgSource.setImageBitmap(sourceBmp);
             }
-            if ( evaList.size() != 0 ) {
+            if ( enhanceBmp != null ) {
 
-                mAdapter.notifyDataSetChanged();
+                mImgEnhance.setImageBitmap(enhanceBmp);
             }
+            mSAdapter.notifyDataSetChanged();
+            mEAdapter.notifyDataSetChanged();
         }
     }
 
-    public void imgEnhanceed(ArrayList<EvaluatBean> evaluatBeans) {
+    public void imgChanged(ArrayList<EvaluatBean> imgList, boolean isSource) {
 
-        evaList.clear();
-        evaList.addAll(evaluatBeans);
-        showImgs();
-    }
+        if ( imgList != null && imgList.size() != 0 ) {
 
-    public void imgChanged(Bitmap bitmap) {
+            if ( isSource ) {
 
-        choosedImg = bitmap;
+                sourceBmp = imgList.get(0).getOldBitmap();
+                mListSource.clear();
+                mListSource.addAll(imgList);
+            } else {
+
+                enhanceBmp = imgList.get(0).getOldBitmap();
+                mListEnhance.clear();
+                mListEnhance.addAll(imgList);
+            }
+        }
         showImgs();
     }
 }

@@ -23,9 +23,9 @@ android {
         python {
             pip {
                 install "matplotlib"
-                install "opencv_python-4.5.1.48-1-cp38-cp38-android_21_arm64_v8a.whl"
+                install "whl_pack/opencv_python-4.5.1.48-1-cp38-cp38-android_21_arm64_v8a.whl"
                 install "imutils"
-                install "matplotlib"
+                install "whl_pack/setuptools-54.0.0-py3-none-any.whl"
                 install "numpy"
             }
         }

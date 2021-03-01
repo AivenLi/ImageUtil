@@ -28,6 +28,9 @@
     <string name="i_enhance">IEnhance</string>
     <string name="i_prune">Prune</string>
     <string name="i_evaluation">Evaluation</string>
+    <string name="img_source">Original image</string>
+    <string name="img_source_param">Original image parameters</string>
+    <string name="img_enhance_param">Enhanced parameters</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

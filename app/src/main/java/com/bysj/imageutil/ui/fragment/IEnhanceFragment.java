@@ -58,50 +58,52 @@ import static android.app.Activity.RESULT_OK;
 
 public class IEnhanceFragment extends BaseFragment implements View.OnClickListener {
 
-    private static final String TAG = "iEnhanceFragment";
+    private static final String    TAG = "iEnhanceFragment";
     /** 源图片控件 */
-    private ImageView           mImgSource;
+    private ImageView              mImgSource;
     /** 提示添加图片控件 */
-    private LinearLayout        mLytAddImgPrompt;
+    private LinearLayout           mLytAddImgPrompt;
     /** 调整图片控制面板 */
-    private LinearLayout        mLytController;
+    private LinearLayout           mLytController;
     /** 清晰度调节器 */
-    private RegulatorView       mRglClarity;
+    private RegulatorView          mRglClarity;
     /** 对比度调节器 */
-    private RegulatorView       mRglContrast;
+    private RegulatorView          mRglContrast;
     /** 饱和度调节器 */
-    private RegulatorView       mRglSaturation;
+    private RegulatorView          mRglSaturation;
     /** 一键自适应 */
-    private TextView            mTvAdaptive;
+    private TextView               mTvAdaptive;
     /** 保存图片按钮 */
-    private TextView            mTvSave;
+    private TextView               mTvSave;
     /** 还原图片 */
-    private TextView            mTvReduction;
+    private TextView               mTvReduction;
     /** 选取图片后图片副本的固定路径 */
-    private String              imgConstantPath     = null;
+    private String                 imgConstantPath     = null;
     /** 相机拍照后的图片文件名 */
-    private String              imgChoosePath       = null;
+    private String                 imgChoosePath       = null;
     /** 清晰度的当前值 */
-    private float               clarityValue        = 0.0f;
+    private float                  clarityValue        = 0.0f;
     /** 对比度的当前值 */
-    private float               contrastValue       = 0.0f;
+    private float                  contrastValue       = 0.0f;
     /** 饱和度的当前值 */
-    private float               saturationValue     = 0.0f;
+    private float                  saturationValue     = 0.0f;
     /** 是否正在处理图片 */
-    private boolean             isHandling          = false;
+    private boolean                isHandling          = false;
     /** 如果处理完图片，则需要用户确认是否使用
      * 处理后的图片。如果不确认，调整图片时是在原图
      * 的基础上进行调整
      */
-    private boolean             useResultImg        = false;
+    private boolean                useResultImg        = false;
     /** OpenCV工具 */
-    private OpenCVUtil          opencv;
+    private OpenCVUtil             opencv;
     /** 评价图片质量工具 */
-    private EvaluatUtil         evaluatUtil;
+    private EvaluatUtil            evaluatUtil;
     /** 处理后的图片 */
-    private Bitmap              targetBitmap        = null;
+    private Bitmap                 targetBitmap        = null;
     /** 确认使用处理后的图片 */
-    private Bitmap              useBitmap           = null;
+    private Bitmap                 useBitmap           = null;
+    /** 存放评价后的图片参数列表 */
+    private ArrayList<EvaluatBean> evaluatBeans;
 
     public IEnhanceFragment() {
         // Required empty public constructor
@@ -112,8 +114,9 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
      */
     public interface ImageChangedListener {
 
-        void imgChanged(Bitmap bitmap);
-        void enhancedImage(ArrayList<EvaluatBean> evaluatBeans);
+        void refreshEvaluatFragment(ArrayList<EvaluatBean> evaluatBeans, boolean isSource);
+        //void imgChanged(Bitmap bitmap, boolean isSource);
+        //void enhancedImage(ArrayList<EvaluatBean> evaluatBeans, Bitmap bitmap);
     }
 
     ImageChangedListener mCallback;
@@ -198,6 +201,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
             LogCat.d(TAG + "获取成功", imgChoosePath);
             setShowImage(true);
             resetImgParam();
+            getImageEva(getFileToBitmap(), true);
         } else if ( what == HandleKeys.COPY_FILE_FAILURE ) {
 
             LogCat.d(TAG + "获取失败", (String)msg.obj);
@@ -210,26 +214,23 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
             useResultImg = true;
             hideLoading();
             targetBitmap = (Bitmap) msg.obj;
-            evaluatUtil.detectAllDimensionSync(targetBitmap, new EvaluatAllListener<Float>() {
-                @Override
-                public void success(ArrayList<Float> data) {
-
-                    LogCat.d(TAG, "清晰度：" + data.get(0) + "，对比度：" + data.get(1) + "，饱和度：" + data.get(2));
-                }
-
-                @Override
-                public void failure(String error) {
-
-                }
-            });
+            getImageEva(targetBitmap, false);
             loadImage();
             setBtnAction(useResultImg);
         } else if ( what == HandleKeys.SAVE_IMAGE_SUCCESS ) {
 
-            Toast.makeText(mContext, getString(R.string.saved, (String)msg.obj), Toast.LENGTH_SHORT).show();
+            myToast(getString(R.string.saved, (String)msg.obj));
+           // Toast.makeText(mContext, getString(R.string.saved, (String)msg.obj), Toast.LENGTH_SHORT).show();
         } else if ( what == HandleKeys.SAVE_IMAGE_FAILURE ) {
 
-            Toast.makeText(mContext, "保存失败：" + (String)msg.obj, Toast.LENGTH_LONG).show();
+            myToast("保存失败：" + (String)msg.obj);
+            //Toast.makeText(mContext, "保存失败：" + (String)msg.obj, Toast.LENGTH_LONG).show();
+        } else if ( what == HandleKeys.GET_EVALUAT_SUCCESS ) {
+
+            mCallback.refreshEvaluatFragment(evaluatBeans, (boolean)msg.obj);
+        } else if ( what == HandleKeys.GET_EVALUAT_FAILURE ) {
+
+            myToast((String)msg.obj);
         }
     }
 
@@ -394,11 +395,12 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
              * 相机
              */
             else if ( requestCode == IntentKeys.MAIN_TO_CAMERA ) {
-
+                /*
                 targetBitmap = null;
                 setShowImage(true);
                 resetImgParam();
-                mCallback.imgChanged(getFileToBitmap());
+                mCallback.imgChanged(getFileToBitmap());*/
+                sendMessage(HandleKeys.COPY_FILE_SUCCESS, imgChoosePath);
             }
         }
     }
@@ -426,6 +428,32 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
             mLytController.setVisibility(View.VISIBLE);
             mLytAddImgPrompt.setVisibility(View.GONE);
             loadImage();
+        }
+    }
+
+    /**
+     * 计算图片质量
+     * @param bitmap 要计算的图片
+     * @param isSource 是否是原图
+     */
+    private void getImageEva(Bitmap bitmap, final boolean isSource) {
+
+        if ( bitmap != null ) {
+
+            evaluatUtil.detectAllSync(bitmap, new EvaluatAllListener<EvaluatBean>() {
+                @Override
+                public void success(ArrayList<EvaluatBean> data) {
+
+                    evaluatBeans = data;
+                    sendMessage(HandleKeys.GET_EVALUAT_SUCCESS, isSource);
+                }
+
+                @Override
+                public void failure(String error) {
+
+                    sendMessage(HandleKeys.GET_EVALUAT_FAILURE, error);
+                }
+            });
         }
     }
 

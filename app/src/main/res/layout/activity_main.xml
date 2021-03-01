@@ -19,7 +19,7 @@
         android:id="@+id/nav_view"
         android:layout_width="match_parent"
         android:layout_height="54dp"
-        android:background="@android:color/white"
+        android:background="@color/gray"
         app:itemHorizontalTranslationEnabled="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

@@ -80,6 +80,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     /** Bottom tab */
     BottomNavigationView        bottomNavigationView;
 
+    private EvaluatFragment     evaluatFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -87,8 +89,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
 
         fragments = new ArrayList<>();
         tabFragments = new ArrayList<>();
+        evaluatFragment = new EvaluatFragment();
         tabFragments.add(new IEnhanceFragment());
-        tabFragments.add(new EvaluatFragment());
+        tabFragments.add(evaluatFragment);
         fragments.add(new TabFragment(tabFragments));
         fragments.add(new IEditFragment());
         getSupportFragmentManager().beginTransaction()
@@ -171,16 +174,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     }
 
     @Override
-    public void imgChanged(Bitmap bitmap) {
+    public void refreshEvaluatFragment(ArrayList<EvaluatBean> evaluatBeans, boolean isSource) {
 
-        LogCat.d(TAG, "Fragment回调");
-        EvaluatFragment fragment = (EvaluatFragment)tabFragments.get(1);
-        fragment.imgChanged(bitmap);
-    }
-
-    @Override
-    public void enhancedImage(ArrayList<EvaluatBean> evaluatBeans) {
-
+        evaluatFragment.imgChanged(evaluatBeans, isSource);
     }
 
     /**

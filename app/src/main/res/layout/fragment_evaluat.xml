@@ -1,22 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.fragment.EvaluatFragment"
+    android:background="@drawable/splash_bg"
     android:id="@+id/fragment_evaluat"
+    android:orientation="vertical"
     >
-
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/lyt_body"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
-
-    <ImageView
-        android:id="@+id/img_test"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
-
-</FrameLayout>
+        >
+        <LinearLayout
+            android:id="@+id/lyt_left"
+            android:layout_marginTop="10dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/lyt_right"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/img_source"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_gravity="center"
+                />
+            <ImageView
+                android:layout_marginTop="10dp"
+                android:id="@+id/img_source"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                />
+            <com.bysj.imageutil.ui.components.MyListView
+                android:id="@+id/list_source"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/lyt_right"
+            android:layout_marginTop="10dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/lyt_left"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/i_enhance"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_gravity="center"
+                />
+            <ImageView
+                android:layout_marginTop="10dp"
+                android:id="@+id/img_enhance"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                />
+            <com.bysj.imageutil.ui.components.MyListView
+                android:id="@+id/list_enhance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
