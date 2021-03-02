@@ -52,10 +52,10 @@ public class ImageCropUtil {
             data.add(new ICropResBean(bitmap));
             return data;
         }
-
-
+        /**
+         * 将Bitmap图片转为矩阵，方便裁剪
+         */
         int[] pixel = new int[width * height];
-
         bitmap.getPixels(pixel, 0, width, 0, 0, width, height);
 
         int rows;
@@ -63,7 +63,9 @@ public class ImageCropUtil {
 
         int blockWidth;
         int blockHeight;
-
+        /**
+         * 根据图片的大小来计算横向裁剪或纵向裁剪
+         */
         switch ( sheets ) {
 
             case 2:
@@ -147,13 +149,31 @@ public class ImageCropUtil {
 
                 return null;
         }
+        /**
+         * 保存裁剪后在界面中显示的列数
+         */
         span = rows;
+        /**
+         * 计算裁剪后一张图片的宽高
+         */
         blockWidth = width / rows;
         blockHeight = height / cols;
-       // LogCat.d(TAG, "Width: " + width + ", Height: " + height + ",blockW: " + blockWidth + ", blockH: " + blockHeight);
+        /**
+         * 返回裁剪结果
+         */
         return crop(pixel, rows, cols, width, blockWidth, blockHeight);
     }
 
+    /**
+     * 裁剪图片，将一张图片裁剪成若干张等份的图片。
+     * @param pixel 图片矩阵
+     * @param rows 横向的张数
+     * @param cols 纵向的张数， rows * cols = 总张数
+     * @param width 原图宽度
+     * @param cWidth 新图的宽度
+     * @param cHeight 新图的高度
+     * @return 图片列表
+     */
     private static ArrayList<ICropResBean> crop(int[] pixel, int rows, int cols, int width, int cWidth, int cHeight) {
 
         ArrayList<ICropResBean> data = new ArrayList<>();
