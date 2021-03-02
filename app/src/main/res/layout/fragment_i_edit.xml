@@ -59,7 +59,21 @@
             android:id="@+id/rlv_crop_sheets"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            />
+        <TextView
+            android:id="@+id/tv_save"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:text="@string/save_image"
+            android:textSize="@dimen/save_image"
+            android:textColor="@color/white"
+            android:background="@drawable/blue_bg_radius"
+            android:gravity="center"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:visibility="gone"
             />
     </LinearLayout>
-
 </androidx.core.widget.NestedScrollView>

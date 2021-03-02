@@ -94,24 +94,25 @@ public class FileUtils {
     }
 
     /**
-     * 保存图片到系统图库
-     * @param context 上下文
-     * @param bmp 原图
-     * @param listener 执行结果回调
+     * 保存图片到系统图库，指定文件名
+     * @param context
+     * @param bmp
+     * @param fileName
+     * @param listener
      */
-    public static void saveImageToGallery(Context context, Bitmap bmp, SaveImageListener listener) {
+    public static void saveImageToGallery(Context context, Bitmap bmp, String fileName, SaveImageListener listener) {
 
         /**
          * 如果已经有一个任务在执行了，则直接返回
          */
-        if ( saving ) {
-
-            if ( listener != null ) {
-
-                listener.failure("正在保存其他图片，请稍后再试");
-            }
-            return;
-        }
+//        if ( saving ) {
+//
+//            if ( listener != null ) {
+//
+//                listener.failure("正在保存其他图片，请稍后再试");
+//            }
+//            return;
+//        }
         saving = true;
         new Thread(new Runnable() {
             @Override
@@ -133,7 +134,7 @@ public class FileUtils {
                 /**
                  * 设置文件名
                  */
-                String fileName = System.currentTimeMillis() + ".jpg";
+                //String fileName = System.currentTimeMillis() + ".jpg";
                 File file = new File(appDir, fileName);
                 try {
 
@@ -167,5 +168,17 @@ public class FileUtils {
                 }
             }
         }).start();
+    }
+
+    /**
+     * 保存图片到系统图库
+     * @param context 上下文
+     * @param bmp 原图
+     * @param listener 执行结果回调
+     */
+    public static void saveImageToGallery(Context context, Bitmap bmp, SaveImageListener listener) {
+
+        String fileName = System.currentTimeMillis() + ".jpg";
+        saveImageToGallery(context, bmp, fileName, listener);
     }
 }

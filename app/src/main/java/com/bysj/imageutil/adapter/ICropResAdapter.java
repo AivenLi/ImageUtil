@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bysj.imageutil.R;
 import com.bysj.imageutil.bean.ICropResBean;
+import com.bysj.imageutil.util.LogCat;
+import com.bysj.imgevaluation.bean.EvaluatBean;
 
 import java.util.ArrayList;
 
@@ -29,12 +31,13 @@ public class ICropResAdapter extends RecyclerView.Adapter<ICropResAdapter.CropVi
     public ICropResAdapter(ArrayList<ICropResBean> data) {
 
         this.data = data;
-        if ( data != null && data.size() != 0 ) {
+    }
 
-            ICropResBean bean = data.get(0);
-            width = bean.getWidth();
-            height = bean.getHeight();
-        }
+    public ICropResAdapter(ArrayList<ICropResBean> data, int width, int height) {
+
+        this.data = data;
+        this.width = width;
+        this.height = height;
     }
 
     @NonNull
@@ -42,7 +45,7 @@ public class ICropResAdapter extends RecyclerView.Adapter<ICropResAdapter.CropVi
     public CropViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_crop_result, parent, false);
-        return new CropViewHolder(view, width, height);
+        return new CropViewHolder(view);
     }
 
     @Override
@@ -67,16 +70,10 @@ public class ICropResAdapter extends RecyclerView.Adapter<ICropResAdapter.CropVi
         public ImageView mImgView;
         public int mPosition;
 
-        public CropViewHolder(@NonNull View itenView) {
+        public CropViewHolder(@NonNull View view) {
 
-            super(itenView);
-            mImgView = itemView.findViewById(R.id.img_crop_result);
-        }
-
-        public CropViewHolder(@NonNull View itemView, int width, int height) {
-
-            super(itemView);
-            mImgView = itemView.findViewById(R.id.img_crop_result);
+            super(view);
+            mImgView = view.findViewById(R.id.img_crop_result);
             if ( width != -1 ) {
 
                 ViewGroup.LayoutParams layoutParams = mImgView.getLayoutParams();

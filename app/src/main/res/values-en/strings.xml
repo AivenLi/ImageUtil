@@ -21,6 +21,7 @@
     <string name="reduction">Reduction</string>
     <string name="adaptive">Adaptive enhancement</string>
     <string name="save_image">Save</string>
+    <string name="saving_image">Saving pictures…</string>
     <string name="saved">Saved to gallery“%1$s”</string>
     <string name="yes">Yes</string>
     <string name="cancel">Cancel</string>
@@ -32,9 +33,17 @@
     <string name="img_source_param">Original image parameters</string>
     <string name="img_enhance_param">Enhanced parameters</string>
     <string name="img_handle_param">Calculating the enhanced data</string>
+    <string name="img_crop_2">2 sheets</string>
+    <string name="img_crop_3">3 sheets</string>
     <string name="img_crop_4">4 sheets</string>
     <string name="img_crop_6">6 sheets</string>
+    <string name="img_crop_8">8 sheets</string>
     <string name="img_crop_9">9 sheets</string>
+    <string name="img_crop_12">12 sheets</string>
+    <string name="img_crop_15">15 sheets</string>
+    <string name="img_crop_16">16 sheets</string>
+    <string name="saving_imgs_prompt">Saving( %1$d/%2$d )</string>
 
+    <string name="param_error">Parameter error, unable to crop</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

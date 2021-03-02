@@ -67,6 +67,7 @@ public class ICropSetAdapter extends RecyclerView.Adapter<ICropSetAdapter.SetVie
             super(itemView);
 
             mTv = itemView.findViewById(R.id.tv_crop);
+            mTv.setOnClickListener(this);
         }
 
         @Override
