@@ -19,6 +19,14 @@ public class LogCat {
         }
     }
 
+    public static void d(String tag, int value) {
+
+        if ( enable ) {
+
+            Log.d(tag, value + "");
+        }
+    }
+
     public static void e(String tag, String value) {
 
         if ( enable ) {

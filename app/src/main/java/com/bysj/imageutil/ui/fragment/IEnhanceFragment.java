@@ -39,6 +39,7 @@ import com.bysj.imageutil.util.GlideUtil;
 import com.bysj.imageutil.util.HandleKeys;
 import com.bysj.imageutil.util.IntentKeys;
 import com.bysj.imageutil.util.LogCat;
+import com.bysj.imageutil.util.ShareUtil;
 import com.bysj.imgevaluation.EvaluatUtil;
 import com.bysj.imgevaluation.bean.EvaluatBean;
 import com.bysj.imgevaluation.listener.EvaluatAllListener;
@@ -76,6 +77,8 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
     private TextView               mTvAdaptive;
     /** 保存图片按钮 */
     private TextView               mTvSave;
+    /** 分享图片 */
+    private TextView               mTvShare;
     /** 还原图片 */
     private TextView               mTvReduction;
     /** 选取图片后图片副本的固定路径 */
@@ -95,6 +98,10 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
      * 的基础上进行调整
      */
     private boolean                useResultImg        = false;
+    /** 分享时需要保存图片，该标志用于判断保存的图片是不是被
+     * 分享调用
+     */
+    private boolean                isShare             = false;
     /** OpenCV工具 */
     private OpenCVUtil             opencv;
     /** 评价图片质量工具 */
@@ -152,6 +159,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
         mTvAdaptive      = view.findViewById(R.id.tv_adaptive);
         mTvSave          = view.findViewById(R.id.tv_save);
         mTvReduction     = view.findViewById(R.id.tv_reduction);
+        mTvShare         = view.findViewById(R.id.tv_share);
 
         setShowImage(false);
         initRglRatio();
@@ -220,10 +228,23 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
             setBtnAction(useResultImg);
         } else if ( what == HandleKeys.SAVE_IMAGE_SUCCESS ) {
 
-            myToast(getString(R.string.saved, (String)msg.obj));
-           // Toast.makeText(mContext, getString(R.string.saved, (String)msg.obj), Toast.LENGTH_SHORT).show();
+            if ( isShare ) {
+
+                String filePath = (String)msg.obj;
+                isShare = false;
+                ShareUtil.share(mContext, filePath);/*
+                File file = new File(filePath);
+                if ( file.exists() ) {
+
+                    file.delete();
+                }*/
+            } else {
+
+                myToast(getString(R.string.saved, (String)msg.obj));
+            }
         } else if ( what == HandleKeys.SAVE_IMAGE_FAILURE ) {
 
+            isShare = false;
             myToast("保存失败：" + (String)msg.obj);
             //Toast.makeText(mContext, "保存失败：" + (String)msg.obj, Toast.LENGTH_LONG).show();
         } else if ( what == HandleKeys.GET_EVALUAT_SUCCESS ) {
@@ -242,6 +263,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
         mTvAdaptive.setOnClickListener(this);
         mTvSave.setOnClickListener(this);
         mTvReduction.setOnClickListener(this);
+        mTvShare.setOnClickListener(this);
     }
 
     @Override
@@ -268,28 +290,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
                     myToast(getString(R.string.handing));
                 } else {
 
-                    if ( targetBitmap == null ) {
-
-                        myToast(getString(R.string.img_is_null));
-                        return;
-                    }
-
-                    /**
-                     * 保存图片到系统图库
-                     */
-                    FileUtils.saveImageToGallery(mContext, targetBitmap, new FileUtils.SaveImageListener() {
-                        @Override
-                        public void success(String filePath) {
-
-                            sendMessage(HandleKeys.SAVE_IMAGE_SUCCESS, filePath);
-                        }
-
-                        @Override
-                        public void failure(String error) {
-
-                            sendMessage(HandleKeys.SAVE_IMAGE_FAILURE, error);
-                        }
-                    });
+                    saveImage();
                 }
             } else {
 
@@ -354,6 +355,10 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
                     sendMessage(HandleKeys.ENHANCE_ADAPTIVE_DONE, bitmap);
                 }
             });
+        } else if ( id == R.id.tv_share ) {
+
+            isShare = true;
+            saveImage();
         }
     }
 
@@ -402,6 +407,32 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
         }
     }
 
+    private void saveImage() {
+
+        if ( targetBitmap == null ) {
+
+            myToast(getString(R.string.img_is_null));
+            return;
+        }
+
+        /**
+         * 保存图片到系统图库
+         */
+        FileUtils.saveImageToGallery(mContext, targetBitmap, new FileUtils.SaveImageListener() {
+            @Override
+            public void success(String filePath) {
+
+                sendMessage(HandleKeys.SAVE_IMAGE_SUCCESS, filePath);
+            }
+
+            @Override
+            public void failure(String error) {
+
+                sendMessage(HandleKeys.SAVE_IMAGE_FAILURE, error);
+            }
+        });
+    }
+
     /**
      * 如果用户添加了图片，则显示图片，如果没有添加，则提示添加
      * @param hasImg
@@ -415,6 +446,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
             mTvReduction.setVisibility(View.GONE);
             mImgSource.setVisibility(View.GONE);
             mLytController.setVisibility(View.GONE);
+            mTvShare.setVisibility(View.GONE);
             mLytAddImgPrompt.setVisibility(View.VISIBLE);
         } else {
 
@@ -423,6 +455,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
             mTvReduction.setVisibility(View.VISIBLE);
             mImgSource.setVisibility(View.VISIBLE);
             mLytController.setVisibility(View.VISIBLE);
+            mTvShare.setVisibility(View.VISIBLE);
             mLytAddImgPrompt.setVisibility(View.GONE);
             loadImage();
         }

@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -100,6 +101,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
                 .add(R.id.layout_content, fragments.get(0))
                 .commitAllowingStateLoss();
         currentPage = 0;
+        LogCat.d("shareUtil", Environment.getExternalStorageDirectory().getAbsolutePath());
     }
 
     @Override

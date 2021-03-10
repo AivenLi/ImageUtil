@@ -44,6 +44,8 @@
     <string name="img_crop_15">15 张</string>
     <string name="img_crop_16">16张</string>
     <string name="saving_imgs_prompt">正在保存（%1$d/%2$d）</string>
+    <string name="share_text">分享图片</string>
+    <string name="share_title">请选择应用</string>
 
     <string name="param_error">参数错误，无法裁剪</string>
     <!-- TODO: Remove or change this placeholder text -->
