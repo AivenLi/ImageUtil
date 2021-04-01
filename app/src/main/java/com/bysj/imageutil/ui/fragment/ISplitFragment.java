@@ -59,11 +59,11 @@ import static android.app.Activity.RESULT_OK;
  * Create on 2021-2-27
  */
 
-public class IEditFragment extends BaseFragment implements View.OnClickListener,
+public class ISplitFragment extends BaseFragment implements View.OnClickListener,
         ICropOnClickListener {
 
     private static final String TAG = "iEditFragment";
-    private static final String IMG_SUFFIX = "_crop.jpg";
+    private static final String IMG_SUFFIX = "_split.jpg";
 
     private ImageView mImgSource;
     private LinearLayout mLytPrompt;
@@ -88,7 +88,7 @@ public class IEditFragment extends BaseFragment implements View.OnClickListener,
 
     private boolean isSaving;
 
-    public IEditFragment() {
+    public ISplitFragment() {
         // Required empty public constructor
     }
 

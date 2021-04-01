@@ -25,7 +25,7 @@ import java.util.List;
  * Create on 2021-2-27
  */
 
-public class TabFragment extends Fragment {
+public class LeftTabFragment extends Fragment {
 
     /** 调试使用 */
     private static final String TAG = "tabFragment";
@@ -38,11 +38,11 @@ public class TabFragment extends Fragment {
     /** Tab控件 */
     private TabLayout           tabLayout;
 
-    public TabFragment() {
+    public LeftTabFragment() {
         // Required empty public constructor
     }
 
-    public TabFragment(ArrayList<Fragment> fragments) {
+    public LeftTabFragment(ArrayList<Fragment> fragments) {
 
         this.fragments = fragments;
     }

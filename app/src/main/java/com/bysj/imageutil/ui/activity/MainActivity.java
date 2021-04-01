@@ -1,65 +1,28 @@
 package com.bysj.imageutil.ui.activity;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Message;
-import android.provider.MediaStore;
-import android.text.TextUtils;
-import android.util.Base64;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.bysj.imageutil.R;
 import com.bysj.imageutil.base.BaseActivity;
-import com.bysj.imageutil.ui.components.RegulatorView;
-import com.bysj.imageutil.ui.components.dialog.DialogLoading;
-import com.bysj.imageutil.ui.components.dialog.DialogPrompt;
-import com.bysj.imageutil.ui.components.dialog.DialogPromptListener;
-import com.bysj.imageutil.ui.fragment.EvaluatFragment;
-import com.bysj.imageutil.ui.fragment.IEditFragment;
+import com.bysj.imageutil.ui.fragment.IEvaluatFragment;
 import com.bysj.imageutil.ui.fragment.IEnhanceFragment;
-import com.bysj.imageutil.ui.fragment.TabFragment;
-import com.bysj.imageutil.util.FileUtils;
-import com.bysj.imageutil.util.GetImgPath;
-import com.bysj.imageutil.util.GlideUtil;
-import com.bysj.imageutil.util.HandleKeys;
-import com.bysj.imageutil.util.IntentKeys;
+import com.bysj.imageutil.ui.fragment.LeftTabFragment;
+import com.bysj.imageutil.ui.fragment.RightTabFragment;
 import com.bysj.imageutil.util.LogCat;
-import com.bysj.imgevaluation.EvaluatUtil;
 import com.bysj.imgevaluation.bean.EvaluatBean;
-import com.bysj.imgevaluation.listener.EvaluatAllListener;
-import com.bysj.opencv450.HandleImageListener;
-import com.bysj.opencv450.OpenCVUtil;
-import com.bysj.opencv450.PictureMatrix;
-import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class MainActivity extends BaseActivity implements
         BottomNavigationView.OnNavigationItemSelectedListener,
@@ -70,7 +33,7 @@ public class MainActivity extends BaseActivity implements
     /** Fragment列表 */
     private ArrayList<Fragment> fragments;
     /**
-     * 本Activity装载两个Fragment，而第一个Fragment（TabFragment）
+     * 本Activity装载两个Fragment，而第一个Fragment（LeftTabFragment）
      * 又装载两个Fragment（分别是IEnhanceFragment和EvaluatFragment），
      * 这两个Fragment需要通信，因此使用本Activity作为通信桥梁，
      * 故在此创建这两个Fragment的实例。
@@ -83,7 +46,7 @@ public class MainActivity extends BaseActivity implements
     /** Bottom tab */
     private BottomNavigationView        bottomNavigationView;
 
-    private EvaluatFragment     evaluatFragment;
+    private IEvaluatFragment IEvaluatFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,11 +55,11 @@ public class MainActivity extends BaseActivity implements
 
         fragments = new ArrayList<>();
         tabFragments = new ArrayList<>();
-        evaluatFragment = new EvaluatFragment();
+        IEvaluatFragment = new IEvaluatFragment();
         tabFragments.add(new IEnhanceFragment());
-        tabFragments.add(evaluatFragment);
-        fragments.add(new TabFragment(tabFragments));
-        fragments.add(new IEditFragment());
+        tabFragments.add(IEvaluatFragment);
+        fragments.add(new LeftTabFragment(tabFragments));
+        fragments.add(new RightTabFragment());
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.layout_content, fragments.get(0))
                 .commitAllowingStateLoss();
@@ -175,13 +138,13 @@ public class MainActivity extends BaseActivity implements
     @Override
     public void refreshEvaluatFragment(ArrayList<EvaluatBean> evaluatBeans, boolean isSource) {
 
-        evaluatFragment.imgChanged(evaluatBeans, isSource);
+        IEvaluatFragment.imgChanged(evaluatBeans, isSource);
     }
 
     @Override
     public void startDetectImgParam() {
 
-        evaluatFragment.startDetectAllParam();
+        IEvaluatFragment.startDetectAllParam();
     }
 
     /**

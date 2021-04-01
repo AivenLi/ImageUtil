@@ -14,4 +14,6 @@ public class HandleKeys {
     public static final int GET_EVALUAT_FAILURE     = -7;
     public static final int SAVE_IMGS_SUCCESS       = 8;
     public static final int SAVE_IMGS_FAILURE       = -8;
+    public static final int CROP_IMG_SUCCESS        = 9;
+    public static final int CROP_IMG_FAILURE        = -9;
 }

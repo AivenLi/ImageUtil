@@ -31,7 +31,7 @@ import java.util.ArrayList;
  * Create on 2021-2-27
  */
 
-public class EvaluatFragment extends BaseFragment implements View.OnClickListener {
+public class IEvaluatFragment extends BaseFragment implements View.OnClickListener {
     /** 本页面标签，调试使用 */
     private static final String    TAG          = "evaluatFragment";
     /** 选择的图片 */
@@ -60,7 +60,7 @@ public class EvaluatFragment extends BaseFragment implements View.OnClickListene
     private boolean                onCreated   = false;
     /** 标记原图参数列表的状态：展开/折叠 */
 
-    public EvaluatFragment() {
+    public IEvaluatFragment() {
         // Required empty public constructor
     }
 

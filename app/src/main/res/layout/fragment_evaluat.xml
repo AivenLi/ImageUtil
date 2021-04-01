@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragment.EvaluatFragment"
+    tools:context=".ui.fragment.IEvaluatFragment"
     android:background="@drawable/splash_bg"
     android:id="@+id/fragment_evaluat"
     android:orientation="vertical"
