@@ -61,7 +61,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class MainActivity extends BaseActivity implements View.OnClickListener,
+public class MainActivity extends BaseActivity implements
         BottomNavigationView.OnNavigationItemSelectedListener,
         IEnhanceFragment.ImageChangedListener {
 
@@ -81,7 +81,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     /** 再按一次退出程序 */
     private long                exitTime              = 0;
     /** Bottom tab */
-    BottomNavigationView        bottomNavigationView;
+    private BottomNavigationView        bottomNavigationView;
 
     private EvaluatFragment     evaluatFragment;
 
@@ -155,11 +155,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
             currentPage = index;
         }
         return true;
-    }
-
-    @Override
-    public void onClick(View view) {
-
     }
 
     @Override

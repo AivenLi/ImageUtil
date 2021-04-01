@@ -182,7 +182,8 @@ public class ImageCropUtil {
 
             for ( int j = 0; j < rows; ++j ) {
 
-                Bitmap bitmap = Bitmap.createBitmap(pixel, j * cWidth + i * cHeight * width, width, cWidth, cHeight, Bitmap.Config.ARGB_8888);
+                Bitmap bitmap = Bitmap.createBitmap(pixel, j * cWidth + i * cHeight * width,
+                        width, cWidth, cHeight, Bitmap.Config.ARGB_8888);
                 data.add(new ICropResBean(bitmap));
             }
         }

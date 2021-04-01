@@ -377,6 +377,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
             if ( requestCode == IntentKeys.MAIN_TO_PHOTOS ) {
 
                 String path = GetImgPath.getPath(mContext, data.getData());
+                LogCat.d(TAG, path);
                 if ( !TextUtils.isEmpty(path) ) {
 
                     final File file = new File(path);

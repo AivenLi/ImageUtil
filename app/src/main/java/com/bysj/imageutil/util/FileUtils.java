@@ -128,7 +128,8 @@ public class FileUtils {
                  */
                 if (!appDir.exists()) {
 
-                    appDir.mkdir();
+                    boolean result = appDir.mkdir();
+                    LogCat.d("iEnhanceFragment", "创建文件夹: " + result);
                 }
 
                 /**
@@ -136,6 +137,7 @@ public class FileUtils {
                  */
                 //String fileName = System.currentTimeMillis() + ".jpg";
                 File file = new File(appDir, fileName);
+
                 try {
 
                     /**

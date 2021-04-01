@@ -85,6 +85,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.2.2'
     implementation 'androidx.navigation:navigation-ui:2.2.2'
 
+    implementation 'com.github.yalantis:ucrop:2.2.6'
     // 轮播
     //implementation 'com.youth.banner:banner:2.0.7'
 }

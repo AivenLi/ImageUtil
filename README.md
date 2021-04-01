@@ -290,7 +290,7 @@
 
 ## 一、JNI原理
 
->>### JNI是Java Native Interface（Java本地接口）的缩写。JNI作为java和操作系统间的一个直接接口，可以通过JNI使得java直接调用操作系统的资源。目前JNI只能通过c/C++实现，因为jni只是对操作系统资源调用的一个桥接过程。所以理论上在windows下只要是dll文件均可以被调用。java代码编译之后是运行在一个jvm里，所以java的任何操作对操作系统而言都是隔着一层虚拟机外壳，这点也正式java的优点，帮助java实现了“Write Once, Run Everywhere”的可移植性。但是使用了jni之后必须要明白这个“Write Once, Run Everywhere”要被打破，必须要实现不同的操作系统的各种jni版本。
+>>### JNI是Java Native Interface（Java本地接口）的缩写。JNI作为java和操作系统间的一个直接接口，可以通过JNI使得java直接调用操作系统的资源。目前JNI只能通过c/C++实现，因为jni只是对操作系统资源调用的一个桥接过程。java代码编译之后是运行在一个jvm里，所以java的任何操作对操作系统而言都是隔着一层虚拟机外壳，这点也正式java的优点，帮助java实现了“Write Once, Run Everywhere”的可移植性。但是使用了jni之后必须要明白这个“Write Once, Run Everywhere”要被打破，必须要实现不同的操作系统的各种jni版本。
 
 >>### 1. JNI规则
 
