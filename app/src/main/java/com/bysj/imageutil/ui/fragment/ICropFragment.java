@@ -32,12 +32,14 @@ import com.bysj.imageutil.ui.components.dialog.DialogLoading;
 import com.bysj.imageutil.ui.components.dialog.DialogPrompt;
 import com.bysj.imageutil.ui.components.dialog.DialogPromptListener;
 import com.bysj.imageutil.util.ActivityManageHelper;
+import com.bysj.imageutil.util.ClickUtil;
 import com.bysj.imageutil.util.FileUtils;
 import com.bysj.imageutil.util.GetImgPath;
 import com.bysj.imageutil.util.GlideUtil;
 import com.bysj.imageutil.util.HandleKeys;
 import com.bysj.imageutil.util.IntentKeys;
 import com.bysj.imageutil.util.LogCat;
+import com.bysj.imageutil.util.ShareUtil;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
 
@@ -52,23 +54,27 @@ public class ICropFragment extends BaseFragment implements View.OnClickListener 
     private static final String TAG             = "iCropFragment";
     private static final String IMG_SUFFIX      = "_crop.jpg";
 
-    private UCrop.Options       ucrop;
-
     private ImageView           mImgSource;
     private ImageView           mImgCrop;
     private LinearLayout        mLytPrompt;
     private TextView            mTvSave;
     private TextView            mTvCrop;
+    private TextView            mTvShare;
+    private LinearLayout        mLytControll;
 
     private String              imgChoosePath   = null;
     private String              imgConstantPath = null;
     private String              imgCropPath     = null;
+    private String              shareImgPath    = null;
     private File                imgFile         = null;
     private File                tempFile        = null;
 
     private Bitmap              mBmp            = null;
     private Uri                 sourceUri       = null;
-    private boolean             isSaving        = false;
+    private boolean             saved           = false;
+    private boolean             iShare          = false;
+
+    private UCrop.Options       options         = null;
 
     public ICropFragment() {
         // Required empty public constructor
@@ -78,7 +84,7 @@ public class ICropFragment extends BaseFragment implements View.OnClickListener 
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        ucrop = new UCrop.Options();
+        options = new UCrop.Options();
     }
 
     @Override
@@ -89,13 +95,16 @@ public class ICropFragment extends BaseFragment implements View.OnClickListener 
         mImgSource      = view.findViewById(R.id.img_source);
         mImgCrop        = view.findViewById(R.id.img_crop_result);
         mLytPrompt      = view.findViewById(R.id.lyt_add_image_prompt);
+        mLytControll    = view.findViewById(R.id.lyt_controller);
         mTvCrop         = view.findViewById(R.id.tv_crop);
         mTvSave         = view.findViewById(R.id.tv_save);
+        mTvShare        = view.findViewById(R.id.tv_share);
 
         mImgSource.setOnClickListener(this);
         mLytPrompt.setOnClickListener(this);
         mTvCrop.setOnClickListener(this);
         mTvSave.setOnClickListener(this);
+        mTvShare.setOnClickListener(this);
 
         return view;
     }
@@ -109,6 +118,11 @@ public class ICropFragment extends BaseFragment implements View.OnClickListener 
         mLoading = new DialogLoading(mContext);
 
         imgConstantPath = mContext.getCacheDir().getPath() + "/";
+
+        options.setAllowedGestures(UCropActivity.SCALE, UCropActivity.ROTATE, UCropActivity.ALL);
+        options.setToolbarColor(ActivityCompat.getColor(mContext, R.color.red));
+        options.setStatusBarColor(ActivityCompat.getColor(mContext, R.color.red));
+        //options.setFreeStyleCropEnabled(true);
     }
 
     @Override
@@ -122,9 +136,10 @@ public class ICropFragment extends BaseFragment implements View.OnClickListener 
 
         int what = msg.what;
 
+        mLoading.hide();
         if ( what == HandleKeys.COPY_FILE_SUCCESS ) {
 
-            //mTvSave.setVisibility(View.GONE);
+            setShareStatus(false);
             imgChoosePath = (String)msg.obj;
             LogCat.d(TAG + "获取成功", imgChoosePath);
             mBmp = BitmapFactory.decodeFile(imgChoosePath);
@@ -134,19 +149,21 @@ public class ICropFragment extends BaseFragment implements View.OnClickListener 
         } else if ( what == HandleKeys.COPY_FILE_FAILURE ) {
 
             LogCat.d(TAG + "获取失败", (String)msg.obj);
+            setShareStatus(false);
         } else if ( what == HandleKeys.SAVE_IMAGE_SUCCESS ) {
 
-            hideLoading();
-            isSaving = false;
-            myToast(getString(R.string.saved, (String)msg.obj));
-        } else if ( what == HandleKeys.SAVE_IMAGE_FAILURE || what == HandleKeys.SAVE_IMGS_FAILURE ) {
+            setShareStatus(true);
+            shareImgPath = (String)msg.obj;
+            myToast(getString(R.string.saved, shareImgPath));
+            if ( iShare ) {
 
+                ShareUtil.share(mContext, shareImgPath);
+            }
+            iShare = false;
+        } else if ( what == HandleKeys.SAVE_IMAGE_FAILURE ) {
+
+            setShareStatus(false);
             myToast("保存失败：" + (String)msg.obj);
-            hideLoading();
-            isSaving = false;
-        } else if ( what == HandleKeys.SAVE_IMGS_SUCCESS ) {
-
-
         } else if ( what == HandleKeys.CROP_IMG_SUCCESS ) {
 
             showCropImg();
@@ -164,9 +181,19 @@ public class ICropFragment extends BaseFragment implements View.OnClickListener 
         if ( id == R.id.lyt_add_image_prompt || id == R.id.img_source ) {
 
             chooseImg();
-        } else if ( id == R.id.tv_save && !isSaving ) {
+        } else if ( id == R.id.tv_save ) {
 
-            saveImgs();
+            if ( !ClickUtil.isFastDoubleClick() ) {
+
+                if ( !saved && !TextUtils.isEmpty(imgCropPath) ) {
+
+                    mLoading.setText(getString(R.string.saving_image)).show();
+                    saveImgs();
+                } else {
+
+                    myToast(getString(R.string.saved, shareImgPath));
+                }
+            }
         } else if ( id == R.id.tv_crop ) {
 
             if ( sourceUri == null ) {
@@ -175,6 +202,19 @@ public class ICropFragment extends BaseFragment implements View.OnClickListener 
                 return;
             }
             startCropImage();
+        } else if ( id == R.id.tv_share ) {
+
+            if ( !ClickUtil.isFastDoubleClick() ) {
+
+                if ( !saved && !TextUtils.isEmpty(imgCropPath)) {
+
+                    iShare = true;
+                    saveImgs();
+                } else {
+
+                    ShareUtil.share(mContext, shareImgPath);
+                }
+            }
         }
     }
 
@@ -248,18 +288,26 @@ public class ICropFragment extends BaseFragment implements View.OnClickListener 
         Uri dst = Uri.fromFile(new File(mContext.getCacheDir(), System.currentTimeMillis() + "cp_result.jpg"));
         LogCat.d(TAG + "开始裁剪", sourceUri.getPath());
         UCrop uCrop = UCrop.of(sourceUri, dst);
-        UCrop.Options options = new UCrop.Options();
-        options.setAllowedGestures(UCropActivity.SCALE, UCropActivity.ROTATE, UCropActivity.ALL);
-        options.setToolbarColor(ActivityCompat.getColor(mContext, R.color.red));
-        options.setStatusBarColor(ActivityCompat.getColor(mContext, R.color.red));
-        //options.setFreeStyleCropEnabled(true);
         uCrop.withOptions(options);
         uCrop.start(mContext, ICropFragment.this, UCrop.REQUEST_CROP);
     }
 
     private void saveImgs() {
 
-        isSaving = true;
+        Bitmap bitmap = BitmapFactory.decodeFile(imgCropPath);
+        FileUtils.saveImageToGallery(mContext, bitmap, System.currentTimeMillis() + "crop_result.jpg", new FileUtils.SaveImageListener() {
+            @Override
+            public void success(String filePath) {
+
+                sendMessage(HandleKeys.SAVE_IMAGE_SUCCESS, filePath);
+            }
+
+            @Override
+            public void failure(String error) {
+
+                sendMessage(HandleKeys.SAVE_IMAGE_FAILURE, error);
+            }
+        });
     }
 
     /**
@@ -321,7 +369,7 @@ public class ICropFragment extends BaseFragment implements View.OnClickListener 
 
             mImgSource.setVisibility(View.VISIBLE);
             mImgCrop.setVisibility(View.GONE);
-            mTvSave.setVisibility(View.GONE);
+            mLytControll.setVisibility(View.GONE);
             mLytPrompt.setVisibility(View.GONE);
             mTvCrop.setVisibility(View.VISIBLE);
             showImg();
@@ -347,8 +395,8 @@ public class ICropFragment extends BaseFragment implements View.OnClickListener 
 
     private void showCropImg() {
 
+        mLytControll.setVisibility(View.VISIBLE);
         mImgCrop.setVisibility(View.VISIBLE);
-        mTvSave.setVisibility(View.VISIBLE);
         GlideUtil.clearDiskCache(mContext);
         Glide.with(mImgCrop.getContext())
                 .load(imgCropPath)
@@ -393,5 +441,18 @@ public class ICropFragment extends BaseFragment implements View.OnClickListener 
                 }
             }
         }).start();
+    }
+
+    private void setShareStatus(boolean isSaved) {
+
+        if ( isSaved ) {
+
+            saved = true;
+        } else {
+
+            saved = false;
+            iShare = false;
+            shareImgPath = null;
+        }
     }
 }

@@ -48,7 +48,7 @@
     <string name="saving_imgs_prompt">Saving( %1$d/%2$d )</string>
     <string name="share_text">Share</string>
     <string name="share_title">Choose an app</string>
-
+    <string name="crop_is_null">Please crop the picture first</string>
     <string name="param_error">Parameter error, unable to crop</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
