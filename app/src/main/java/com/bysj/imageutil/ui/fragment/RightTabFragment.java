@@ -45,7 +45,7 @@ public class RightTabFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         fragments.add(new ICropFragment());
         fragments.add(new SpliceFragment());
-        fragments.add(new ISplitFragment());
+       // fragments.add(new ISplitFragment());
     }
 
     @Override
@@ -57,7 +57,7 @@ public class RightTabFragment extends BaseFragment {
         tabLayout   = view.findViewById(R.id.tab_layout);
         tabTitles.add(this.getString(R.string.i_crop));
         tabTitles.add(this.getString(R.string.i_splice));
-        tabTitles.add(this.getString(R.string.i_split));
+       // tabTitles.add(this.getString(R.string.i_split));
 
         return view;
     }
