@@ -11,11 +11,11 @@ import com.bysj.imageutil.R;
 
 public class SimpleRecyclerViewHolder extends ViewHolder {
     public ImageView iconView;
-    public TextView textView;
+    public ImageView clearView;
 
     public SimpleRecyclerViewHolder(@NonNull View itemView) {
         super(itemView);
         iconView = itemView.findViewById(R.id.icon);
-        textView = itemView.findViewById(R.id.tv);
+        clearView = itemView.findViewById(R.id.img_remove);
     }
 }

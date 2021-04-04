@@ -78,6 +78,13 @@ public class DialogPrompt implements View.OnClickListener {
         return this;
     }
 
+    public DialogPrompt setYesCancelVisibility(int visibility) {
+
+        mTvYes.setVisibility(visibility);
+        mTvCancel.setVisibility(visibility);
+        return this;
+    }
+
     public void setBackground(Drawable resource) {
 
         mLytBody.setBackground(resource);
@@ -144,10 +151,7 @@ public class DialogPrompt implements View.OnClickListener {
 
     public DialogPrompt setYesText(String yesText) {
 
-        if ( !TextUtils.isEmpty(yesText) ) {
-
-            mTvYes.setText(yesText);
-        }
+        mTvYes.setText(yesText);
         return this;
     }
 
@@ -174,10 +178,7 @@ public class DialogPrompt implements View.OnClickListener {
 
     public DialogPrompt setCancelText(String cancelText) {
 
-        if ( !TextUtils.isEmpty(cancelText) ) {
-
-            mTvCancel.setText(cancelText);
-        }
+        mTvCancel.setText(cancelText);
         return this;
     }
 

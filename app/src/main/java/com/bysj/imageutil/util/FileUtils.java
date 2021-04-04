@@ -93,6 +93,27 @@ public class FileUtils {
         void failure(String error);
     }
 
+    public static File bitmapToFile(Bitmap bitmap, String path) {
+
+        File file = new File(path);
+        if ( file.exists() ) {
+
+            file.delete();
+        }
+        try {
+
+            FileOutputStream fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+
+            e.printStackTrace();
+            return null;
+        }
+        return file;
+    }
+
     /**
      * 保存图片到系统图库，指定文件名
      * @param context

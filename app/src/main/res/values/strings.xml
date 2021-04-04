@@ -37,6 +37,12 @@
     <string name="img_source_param">原图参数</string>
     <string name="img_enhance_param">增强参数</string>
     <string name="img_handle_param">正在计算增强后的各项数据</string>
+    <string name="img_splice">合成图片</string>
+    <string name="img_splice_action">正在合成图片，请耐心等待…</string>
+    <string name="img_splice_error">无法拼接图片：%1$s</string>
+    <string name="img_splice_error_only_one">请选择两张以上的图片进行拼接</string>
+    <string name="img_splice_error_not_rectangle">图片必须是横向或纵向排列才能进行拼接</string>
+    <string name="img_splice_ing">已经有一个合成图片任务正在进行，请耐心等待…</string>
     <string name="img_crop_2">2张</string>
     <string name="img_crop_3">3张</string>
     <string name="img_crop_4">4张</string>

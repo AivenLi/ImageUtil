@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -19,7 +20,11 @@ import com.bysj.imageutil.util.ActivityManageHelper;
 import com.bysj.imageutil.util.LogCat;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
+import java.io.File;
+
 public class SplashActivity extends AppCompatActivity {
+
+    private static final String TAG = "splashActivity";
 
     private Handler handler;
     private static final long DELAY = 3000;
@@ -78,7 +83,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     /**
-     * 跳到MainActivity
+     * 跳到MainActivity，跳转的同时清除上一次留下来的缓存文件，主要是图片
      */
     private void jumpToMainActivity() {
 
@@ -92,6 +97,40 @@ public class SplashActivity extends AppCompatActivity {
                 ActivityManageHelper.getInstance().finshActivity(SplashActivity.this);
             }
         }, DELAY);
+        deleteImagesCacheSync();
+    }
+
+    /**
+     * 清除图片缓存
+     */
+    private void deleteImagesCacheSync() {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                File dir = getCacheDir();
+                String[] files = dir.list();
+                if ( files == null ) {
+
+                    return;
+                }
+                for (String s : files) {
+
+                    File file = new File(dir, s);
+                    String fileName = file.getPath();
+                    if ( fileName.contains(".png") || fileName.contains("jpg") ||fileName.contains(".jpeg") ) {
+
+                        LogCat.d(TAG + "删除文件", fileName);
+                        if ( file.exists() ) {
+
+                            file.delete();
+                            LogCat.d(TAG, fileName);
+                        }
+                    }
+                }
+            }
+        }).start();
     }
 
     /**

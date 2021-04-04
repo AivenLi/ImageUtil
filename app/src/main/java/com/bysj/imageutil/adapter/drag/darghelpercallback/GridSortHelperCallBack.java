@@ -4,20 +4,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-
-import com.bysj.imageutil.adapter.drag.RecyclerItem;
+import com.bysj.imageutil.bean.ICropResBean;
+import com.bysj.imageutil.bean.SpliceBean;
 
 import java.util.List;
 
-/**
- * 网格拖拽排序Helper
- *
- * @author JasonChen
- * @email chenjunsen@outlook.com
- * @createTime 2021/2/10 15:01
- */
+
 public class GridSortHelperCallBack extends VerticalDragSortHelperCallBack {
-    public GridSortHelperCallBack(List<RecyclerItem> recyclerItemList) {
+    public GridSortHelperCallBack(List<SpliceBean> recyclerItemList) {
         super(recyclerItemList);
     }
 

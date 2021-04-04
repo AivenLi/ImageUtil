@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            >
+            > <!--
             <TextView
                 android:id="@+id/tv_add_img"
                 android:layout_width="wrap_content"
@@ -23,11 +23,24 @@
                 android:textColor="@color/red"
                 android:textSize="@dimen/save_image"
                 android:layout_gravity="center"
-                />
+                /> -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/ryv_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                />
+            <TextView
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="50dp"
+                android:layout_marginLeft="50dp"
+                android:id="@+id/tv_splice"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="@string/img_splice"
+                android:textColor="@color/white"
+                android:textSize="@dimen/save_image"
+                android:background="@drawable/blue_bg_radius"
+                android:gravity="center"
                 />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

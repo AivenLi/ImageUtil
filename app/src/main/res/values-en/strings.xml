@@ -36,6 +36,12 @@
     <string name="img_source_param">Original image parameters</string>
     <string name="img_enhance_param">Enhanced parameters</string>
     <string name="img_handle_param">Calculating the enhanced data</string>
+    <string name="img_splice">Composite picture</string>
+    <string name="img_splice_action">The picture is being synthesized, please be patient…</string>
+    <string name="img_splice_error">Unable to stitch pictures:%1$s</string>
+    <string name="img_splice_error_only_one">Please select two or more pictures for stitching</string>
+    <string name="img_splice_error_not_rectangle">Pictures must be arranged in a rectangle to be stitched</string>
+    <string name="img_splice_ing">There is already a compositing picture task in progress, please be patient…</string>
     <string name="img_crop_2">2 sheets</string>
     <string name="img_crop_3">3 sheets</string>
     <string name="img_crop_4">4 sheets</string>

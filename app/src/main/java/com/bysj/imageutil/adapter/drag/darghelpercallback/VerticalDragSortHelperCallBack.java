@@ -6,29 +6,23 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bysj.imageutil.adapter.drag.RecyclerItem;
+import com.bysj.imageutil.bean.ICropResBean;
+import com.bysj.imageutil.bean.SpliceBean;
 
 import java.util.Collections;
 import java.util.List;
 
 
-/**
- * 垂直拖拽排序的Helper
- *
- * @author JasonChen
- * @email chenjunsen@outlook.com
- * @createTime 2021/2/9 16:40
- */
 public class VerticalDragSortHelperCallBack extends ItemTouchHelper.Callback {
 
-    private List<RecyclerItem> recyclerItemList;
+    private List<SpliceBean> recyclerItemList;
     private OnDragListener onDragListener;
 
     public void setOnDragListener(OnDragListener onDragListener) {
         this.onDragListener = onDragListener;
     }
 
-    public VerticalDragSortHelperCallBack(List<RecyclerItem> recyclerItemList) {
+    public VerticalDragSortHelperCallBack(List<SpliceBean> recyclerItemList) {
         this.recyclerItemList = recyclerItemList;
     }
 
@@ -62,9 +56,8 @@ public class VerticalDragSortHelperCallBack extends ItemTouchHelper.Callback {
 
     @Override
     public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int fromPos, @NonNull RecyclerView.ViewHolder target, int toPos, int x, int y) {
+
         super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y);
-        Log.d("onMoved", "第一个:" + recyclerItemList.get(0).toString() + " " + fromPos + "--->" + toPos);
-        Log.d("onMoved", "第二个:" + recyclerItemList.get(1).toString() + " " + fromPos + "--->" + toPos);
         if (onDragListener != null) {
             onDragListener.onItemMoved(viewHolder, target, fromPos, toPos);
         }
@@ -80,13 +73,6 @@ public class VerticalDragSortHelperCallBack extends ItemTouchHelper.Callback {
         return true;
     }
 
-    /**
-     * 拖拽监听器
-     *
-     * @author JasonChen
-     * @email chenjunsen@outlook.com
-     * @createTime 2021/2/10 14:12
-     */
     public interface OnDragListener {
         void onItemMoved(RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target, int fromPos, int toPos);
     }

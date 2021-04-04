@@ -6,12 +6,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-/**
- * 条目间距装饰
- * @author JasonChen
- * @email chenjunsen@outlook.com
- * @createTime 2021/2/9 15:54
- */
+
 public class GapDecoration extends RecyclerView.ItemDecoration {
     @Override
     public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {

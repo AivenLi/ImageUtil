@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.bysj.imageutil.R;
 import com.bysj.imgevaluation.bean.EvaluatBean;
 
@@ -65,7 +66,10 @@ public class IEnAdapter extends BaseAdapter {
 
         viewHolder.mTvKey.setText(evaluatBean.getDimension());
         viewHolder.mTvValue.setText(evaluatBean.getValue() + "");
-        viewHolder.mImg.setImageBitmap(evaluatBean.getNewBitmap());
+        Glide.with(viewHolder.mImg.getContext())
+                .load(evaluatBean.getNewBitmap())
+                .placeholder(android.R.color.darker_gray)
+                .into(viewHolder.mImg);
 
         return view;
     }

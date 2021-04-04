@@ -1,6 +1,8 @@
 package com.bysj.imageutil.base;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
 import android.view.LayoutInflater;
@@ -110,6 +112,22 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
+    protected void showDialog(String title, String content, String yes, String cancel) {
+
+        showDialog(title, content, yes, cancel, null);
+    }
+
+    protected void showDialog(String title, String content, String yes, String cancel, DialogPromptListener listener) {
+
+        if ( mDialog != null ) {
+
+            mDialog.setTitleContent(title, content)
+                    .setYesText(yes)
+                    .setCancelText(cancel)
+                    .show(listener);
+        }
+    }
+
     protected void showDialog(String title, String content, DialogPromptListener listener) {
 
         if ( mDialog != null ) {
@@ -130,7 +148,7 @@ public abstract class BaseFragment extends Fragment {
      * “正在加载”弹窗标题
      * @param title
      */
-    protected void showLoadingDialog(String title) {
+    protected void showLoading(String title) {
 
         if ( mLoading != null ) {
 
@@ -180,6 +198,13 @@ public abstract class BaseFragment extends Fragment {
     protected void sendEmptyMessage(int what) {
 
         handler.sendEmptyMessage(what);
+    }
+
+    protected void jumpOtherPage(Class<?> cls, Uri uri) {
+
+        Intent intent = new Intent(getActivity(), cls);
+        intent.setData(uri);
+        mContext.startActivity(intent);
     }
 
     /**

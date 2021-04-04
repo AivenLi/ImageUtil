@@ -29,24 +29,24 @@ public class MainActivity extends BaseActivity implements
         IEnhanceFragment.ImageChangedListener {
 
     /** 日志标志 */
-    private static final String TAG                   = "mainActivity";
+    private static final String  TAG                   = "mainActivity";
     /** Fragment列表 */
-    private ArrayList<Fragment> fragments;
+    private ArrayList<Fragment>  fragments;
     /**
      * 本Activity装载两个Fragment，而第一个Fragment（LeftTabFragment）
      * 又装载两个Fragment（分别是IEnhanceFragment和EvaluatFragment），
      * 这两个Fragment需要通信，因此使用本Activity作为通信桥梁，
      * 故在此创建这两个Fragment的实例。
      */
-    private ArrayList<Fragment> tabFragments;
+    private ArrayList<Fragment>  tabFragments;
     /** 当前页 */
-    private int                 currentPage;
+    private int                  currentPage;
     /** 再按一次退出程序 */
-    private long                exitTime              = 0;
+    private long                 exitTime              = 0;
     /** Bottom tab */
-    private BottomNavigationView        bottomNavigationView;
+    private BottomNavigationView bottomNavigationView;
 
-    private IEvaluatFragment IEvaluatFragment;
+    private IEvaluatFragment     IEvaluatFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

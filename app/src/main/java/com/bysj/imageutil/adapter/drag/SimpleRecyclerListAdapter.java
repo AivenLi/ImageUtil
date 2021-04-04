@@ -8,26 +8,30 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.bysj.imageutil.R;
+import com.bysj.imageutil.bean.ICropResBean;
+import com.bysj.imageutil.bean.SpliceBean;
 
 import java.util.List;
 
-/**
- * 简单的垂直拖拽排序适配器
- * @author JasonChen
- * @email chenjunsen@outlook.com
- * @createTime 2021/2/10 10:34
- */
+
 public class SimpleRecyclerListAdapter extends RecyclerView.Adapter<SimpleRecyclerViewHolder> {
 
-    private List<RecyclerItem> recyclerItemList;
+    private List<SpliceBean> recyclerItemList;
     private OnItemCLickListener onItemCLickListener;
+    private OnItemRemoveClickListener onItemRemoveClickListener;
 
     public void setOnItemCLickListener(OnItemCLickListener onItemCLickListener) {
         this.onItemCLickListener = onItemCLickListener;
     }
 
-    public SimpleRecyclerListAdapter(List<RecyclerItem> recyclerItemList) {
+    public void setOnItemRemoveClickListener(OnItemRemoveClickListener onItemRemoveClickListener) {
+
+        this.onItemRemoveClickListener = onItemRemoveClickListener;
+    }
+
+    public SimpleRecyclerListAdapter(List<SpliceBean> recyclerItemList) {
         this.recyclerItemList = recyclerItemList;
     }
 
@@ -40,14 +44,33 @@ public class SimpleRecyclerListAdapter extends RecyclerView.Adapter<SimpleRecycl
 
     @Override
     public void onBindViewHolder(@NonNull SimpleRecyclerViewHolder holder, int position) {
-        RecyclerItem item = recyclerItemList.get(position);
-        holder.iconView.setImageBitmap(item.getIcon());
-        holder.textView.setText(item.getText());
+        SpliceBean item = recyclerItemList.get(position);
+        Glide.with(holder.iconView.getContext())
+                .load(item.getImage())
+                .placeholder(android.R.color.darker_gray)
+                .into(holder.iconView);
+        if ( item.getHasImage() ) {
+
+            holder.clearView.setVisibility(View.VISIBLE);
+        } else {
+
+            holder.clearView.setVisibility(View.GONE);
+        }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (onItemCLickListener != null) {
                     onItemCLickListener.onItemClick(item, holder, position);
+                }
+            }
+        });
+        holder.clearView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if ( onItemRemoveClickListener != null ) {
+
+                    onItemRemoveClickListener.onItemRemoveClick(position);
                 }
             }
         });
@@ -59,7 +82,12 @@ public class SimpleRecyclerListAdapter extends RecyclerView.Adapter<SimpleRecycl
     }
 
     public interface OnItemCLickListener {
-        void onItemClick(RecyclerItem recyclerItem, SimpleRecyclerViewHolder holder, int position);
+        void onItemClick(SpliceBean recyclerItem, SimpleRecyclerViewHolder holder, int position);
+    }
+
+    public interface OnItemRemoveClickListener {
+
+        void onItemRemoveClick(int position);
     }
 
     protected @LayoutRes int getItemLayoutRes(){

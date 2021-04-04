@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -27,23 +28,32 @@ import android.widget.TextView;
 
 import com.bysj.imageutil.R;
 import com.bysj.imageutil.adapter.drag.GapGridDecoration;
-import com.bysj.imageutil.adapter.drag.RecyclerItem;
 import com.bysj.imageutil.adapter.drag.SimpleRecyclerGridAdapter;
+import com.bysj.imageutil.adapter.drag.SimpleRecyclerListAdapter;
+import com.bysj.imageutil.adapter.drag.SimpleRecyclerViewHolder;
 import com.bysj.imageutil.adapter.drag.darghelpercallback.GridSortHelperCallBack;
 import com.bysj.imageutil.adapter.drag.darghelpercallback.VerticalDragSortHelperCallBack;
 import com.bysj.imageutil.base.BaseFragment;
 import com.bysj.imageutil.bean.ICropResBean;
+import com.bysj.imageutil.bean.SpliceBean;
+import com.bysj.imageutil.ui.activity.SpliceResultActivity;
 import com.bysj.imageutil.ui.components.dialog.DialogLoading;
 import com.bysj.imageutil.ui.components.dialog.DialogPrompt;
 import com.bysj.imageutil.ui.components.dialog.DialogPromptListener;
+import com.bysj.imageutil.util.ClickUtil;
 import com.bysj.imageutil.util.FileUtils;
 import com.bysj.imageutil.util.GetImgPath;
 import com.bysj.imageutil.util.HandleKeys;
+import com.bysj.imageutil.util.ImageSpliceUtil;
 import com.bysj.imageutil.util.IntentKeys;
 import com.bysj.imageutil.util.LogCat;
+import com.bysj.imageutil.util.ShareUtil;
+import com.bysj.imageutil.util.matrix.Graph;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
@@ -53,16 +63,19 @@ public class SpliceFragment extends BaseFragment implements View.OnClickListener
 
     private static final String TAG = "spliceFragment";
 
-    private TextView mTvAddImg;
+    private TextView mTvSplice;
     private RecyclerView recyclerView;
 
-    private List<RecyclerItem> list = new ArrayList<>();
+    private List<SpliceBean> list = new ArrayList<>();
     private ItemTouchHelper itemTouchHelper;
     private SimpleRecyclerGridAdapter adapter;
 
     private String imgChoosePath = null;
     private String imgConstantPath = null;
     private static final String IMG_SUFFIX = "splice.jpg";
+    private int currenItemIndex;
+    private boolean isSplice = false;
+    private int canNotMoveIndex = 2;
 
     public SpliceFragment() {
         // Required empty public constructor
@@ -74,11 +87,28 @@ public class SpliceFragment extends BaseFragment implements View.OnClickListener
         super.onCreate(savedInstanceState);
     }
 
+    @Override
+    protected boolean isLazyLoad() {
+
+        return true;
+    }
+
+    @Override
+    protected void initData() {
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                list.addAll(getRecycleViewEmptyItem());
+                sendEmptyMessage(HandleKeys.INIT_DATA_FINISHED);
+            }
+        }, 100);
+    }
+
     private void myInitView() {
 
-
         recyclerView.setNestedScrollingEnabled(false);
-
     }
 
     @Override
@@ -87,8 +117,10 @@ public class SpliceFragment extends BaseFragment implements View.OnClickListener
         View view = inflater.inflate(R.layout.fragment_splice, container, false);
 
         recyclerView = view.findViewById(R.id.ryv_item);
-        mTvAddImg = view.findViewById(R.id.tv_add_img);
-        mTvAddImg.setOnClickListener(this);
+        mTvSplice    = view.findViewById(R.id.tv_splice);
+        mTvSplice.setOnClickListener(this);
+        //mTvAddImg = view.findViewById(R.id.tv_add_img);
+//        mTvAddImg.setOnClickListener(this);
 
         return view;
     }
@@ -108,7 +140,7 @@ public class SpliceFragment extends BaseFragment implements View.OnClickListener
 
         adapter = new SimpleRecyclerGridAdapter(list);
         recyclerView.setAdapter(adapter);
-        int span = 3;
+        int span = 2;
         recyclerView.setLayoutManager(new GridLayoutManager(mContext, span));
         recyclerView.addItemDecoration(new GapGridDecoration(span));
         GridSortHelperCallBack callBack = new GridSortHelperCallBack(list);
@@ -116,7 +148,41 @@ public class SpliceFragment extends BaseFragment implements View.OnClickListener
             @Override
             public void onItemMoved(RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target, int fromPos, int toPos) {
 
-                myToast("位置发生了改变：" + fromPos + "---->" + toPos);
+                //myToast("位置发生了改变：" + fromPos + "---->" + toPos);
+                if ( fromPos == canNotMoveIndex ) {
+
+                    canNotMoveIndex = toPos;
+                } else if ( toPos == canNotMoveIndex ) {
+
+                    canNotMoveIndex = fromPos;
+                }
+            }
+        });
+        adapter.setOnItemCLickListener(new SimpleRecyclerListAdapter.OnItemCLickListener() {
+            @Override
+            public void onItemClick(SpliceBean recyclerItem, SimpleRecyclerViewHolder holder, int position) {
+
+                if ( position != canNotMoveIndex ) {
+
+                    currenItemIndex = position;
+                    chooseImg();
+                }
+            }
+        });
+        adapter.setOnItemRemoveClickListener(new SimpleRecyclerListAdapter.OnItemRemoveClickListener() {
+            @Override
+            public void onItemRemoveClick(int position) {
+
+                if ( position != canNotMoveIndex ) {
+
+                    LogCat.d(TAG, "清除图片");
+                    SpliceBean item = list.get(position);
+                    deleteFile(item.getName());
+                    item.setImage(getAddImageIcon());
+                    item.setHasImage(false);
+                    item.setName(null);
+                    adapter.notifyDataSetChanged();
+                }
             }
         });
         itemTouchHelper = new ItemTouchHelper(callBack);
@@ -134,24 +200,45 @@ public class SpliceFragment extends BaseFragment implements View.OnClickListener
 
         int what = msg.what;
 
+        hideLoading();
         if ( what == HandleKeys.COPY_FILE_SUCCESS ) {
 
             imgChoosePath = (String)msg.obj;
             LogCat.d(TAG + "获取成功", imgChoosePath);
             Bitmap mBmp = BitmapFactory.decodeFile(imgChoosePath);
-            list.add(new RecyclerItem(mBmp, "1"));
+            SpliceBean item = list.get(currenItemIndex);
+            item.setImage(mBmp);
+            item.setName(imgChoosePath);
             adapter.notifyDataSetChanged();
         } else if ( what == HandleKeys.COPY_FILE_FAILURE ) {
 
             LogCat.d(TAG + "获取失败", (String)msg.obj);
         } else if ( what == HandleKeys.SAVE_IMAGE_SUCCESS ) {
 
-            hideLoading();
             myToast(getString(R.string.saved, (String)msg.obj));
         } else if ( what == HandleKeys.SAVE_IMAGE_FAILURE ) {
 
             myToast("保存失败：" + (String)msg.obj);
-            hideLoading();
+        } else if ( what == HandleKeys.SPLICE_ONLY_ONE ) {
+
+            isSplice = false;
+            showDialog(getString(R.string.dia_error), getString(R.string.img_splice_error, getString(R.string.img_splice_error_only_one)),
+                    getString(R.string.yes), getString(R.string.cancel));
+        } else if ( what == HandleKeys.SPLICE_NOT_RECTANGLE ) {
+
+            isSplice = false;
+            showDialog(getString(R.string.dia_error), getString(R.string.img_splice_error, getString(R.string.img_splice_error_not_rectangle)),
+                    getString(R.string.yes), getString(R.string.cancel));
+        } else if ( what == HandleKeys.SPLICE_SUCCESS ) {
+
+            // TODO 合成图片成功
+            isSplice = false;
+            File file = (File)msg.obj;
+            Uri uri = Uri.fromFile(file);
+            jumpOtherPage(SpliceResultActivity.class, uri);
+        } else if ( what == HandleKeys.INIT_DATA_FINISHED ) {
+
+            adapter.notifyDataSetChanged();
         }
     }
 
@@ -201,16 +288,109 @@ public class SpliceFragment extends BaseFragment implements View.OnClickListener
     }
 
 
-
     @Override
     public void onClick(View view) {
 
         int id = view.getId();
-
+        /*
         if ( id == R.id.tv_add_img ) {
 
             chooseImg();
         }
+        */
+        if ( id == R.id.tv_splice && !ClickUtil.isFastDoubleClick() ) {
+
+            int count = 0;
+            for ( int i = 0; i < 3; ++i ) {
+
+                if ( list.get(i).getHasImage() ) {
+
+                    count++;
+                }
+            }
+            LogCat.d(TAG, count);
+            if ( count <= 1 ) {
+
+                sendEmptyMessage(HandleKeys.SPLICE_ONLY_ONE);
+                return;
+            }
+            spliceImagesSync();
+        }
+    }
+
+    /**
+     * 合成图片，合成图片是一个漫长的过程，使用线程进行处理避免主线程阻塞。
+     */
+    private void spliceImagesSync() {
+
+        if ( isSplice ) {
+
+            myToast(getString(R.string.img_splice_ing));
+            return;
+        }
+
+        Bitmap bitmap1;
+        Bitmap bitmap2;
+        boolean line;
+        if ( canNotMoveIndex == 0 ) {
+
+            sendEmptyMessage(HandleKeys.SPLICE_NOT_RECTANGLE);
+            return;
+        } else if ( canNotMoveIndex == 1 ) {
+
+            bitmap1 = list.get(0).getImage();
+            bitmap2 = list.get(2).getImage();
+            line = false;
+        } else {
+
+            bitmap1 = list.get(0).getImage();
+            bitmap2 = list.get(1).getImage();
+            line = true;
+        }
+
+        LogCat.d(TAG, "拼接" + ": " + canNotMoveIndex);
+        isSplice = true;
+        showLoading(getString(R.string.img_splice_action));
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                Bitmap bitmap = ImageSpliceUtil.spliceImage(bitmap1, bitmap2, line);
+                File file = FileUtils.bitmapToFile(bitmap, imgConstantPath + "splice_result.jpg");
+                if ( file == null ) {
+
+                    LogCat.d(TAG, "转换文件失败");
+                } else {
+
+                    sendMessage(HandleKeys.SPLICE_SUCCESS, file);
+                }
+            }
+        }).start();
+    }
+
+    private List<SpliceBean> getRecycleViewEmptyItem() {
+
+        List<SpliceBean> list = new ArrayList<>();
+
+        for ( int i = 0; i < 3; ++i ) {
+
+            list.add(getSpliceEmptyBean());
+        }
+        list.get(2).setImage(null);
+        return list;
+    }
+
+    private SpliceBean getSpliceEmptyBean() {
+
+        Bitmap bitmap = getAddImageIcon();
+        return new SpliceBean(bitmap, null,false);
+    }
+
+    private Bitmap getAddImageIcon() {
+
+        int redId = getResources().getIdentifier("add_icon", "mipmap", "com.bysj.imageutil");
+        return BitmapFactory.decodeResource(getResources(), redId);
     }
 
     /**
@@ -222,6 +402,7 @@ public class SpliceFragment extends BaseFragment implements View.OnClickListener
                 .setContent("")
                 .setYesText(getString(R.string.dia_choose_img_camera))
                 .setCancelText(getString(R.string.dia_choose_img_photos))
+                //.setYesCancelVisibility(View.VISIBLE)
                 .show(new DialogPromptListener() {
                     @Override
                     public void yes() {
@@ -264,5 +445,73 @@ public class SpliceFragment extends BaseFragment implements View.OnClickListener
                         startActivityForResult(intent, IntentKeys.MAIN_TO_PHOTOS);
                     }
                 });
+    }
+
+    /**
+     * 删除文件
+     * @param fileName 文件名
+     */
+    private void deleteFile(String fileName) {
+
+        if ( TextUtils.isEmpty(fileName) ) {
+
+            return;
+        }
+        LogCat.d(TAG, "开始删除: " + fileName);
+        File file = new File(fileName);
+        if ( file.exists() ) {
+
+            boolean result = file.delete();
+            if ( result ) {
+
+                LogCat.d(TAG, "删除成功");
+            } else {
+
+                LogCat.d(TAG, "删除失败");
+            }
+        } else {
+
+            LogCat.d(TAG, "文件不存在");
+        }
+    }
+
+    /**
+     * 清除相机拍照后产生的缓存图片
+     * @param saveFileName 保留的图片
+     * @param contains 删除的图片必须包含某些特定的字符
+     * @param format 图片格式
+     */
+    private void clearCacheCapture(String saveFileName, String format, String contains) {
+
+        if ( TextUtils.isEmpty(saveFileName) ) {
+
+            return;
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                File dir = mContext.getCacheDir();
+                String[] files = dir.list();
+                if ( files == null ) {
+
+                    return;
+                }
+                for (String s : files) {
+
+                    File file = new File(dir, s);
+                    String fileName = file.getPath();
+                    if ( fileName.contains(format) && fileName.contains(contains) && !fileName.equals(saveFileName)) {
+
+                        LogCat.d(TAG + "删除文件", fileName);
+                        if ( file.exists() ) {
+
+                            file.delete();
+                            LogCat.d(TAG, fileName);
+                        }
+                    }
+                }
+            }
+        }).start();
     }
 }

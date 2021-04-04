@@ -8,13 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-/**
- * 网格布局条目间距装饰器
- *
- * @author JasonChen
- * @email chenjunsen@outlook.com
- * @createTime 2021/2/10 15:21
- */
+
 public class GapGridDecoration extends RecyclerView.ItemDecoration {
     private int spanCount;
 
