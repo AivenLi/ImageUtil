@@ -44,7 +44,6 @@ public class DialogPrompt implements View.OnClickListener {
 
         LayoutInflater layoutInflater = LayoutInflater.from(mContext);
         View dialogView = layoutInflater.inflate(R.layout.dialog_prompt, null);
-
         //mLytBody   = dialogView.findViewById(R.id.lyt_body);
         mTvTitle   = dialogView.findViewById(R.id.tv_prompt_title);
         mTvContent = dialogView.findViewById(R.id.tv_prompt_content);
@@ -56,6 +55,7 @@ public class DialogPrompt implements View.OnClickListener {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setView(dialogView);
         alertDialog = builder.create();
+        alertDialog.getWindow().setWindowAnimations(R.style.DialogShowHideStyle);
         mTvYes.setOnClickListener(this);
         mTvCancel.setOnClickListener(this);
     }

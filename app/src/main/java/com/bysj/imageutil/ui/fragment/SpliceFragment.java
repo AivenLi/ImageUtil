@@ -231,7 +231,6 @@ public class SpliceFragment extends BaseFragment implements View.OnClickListener
                     getString(R.string.yes), getString(R.string.cancel));
         } else if ( what == HandleKeys.SPLICE_SUCCESS ) {
 
-            // TODO 合成图片成功
             isSplice = false;
             File file = (File)msg.obj;
             Uri uri = Uri.fromFile(file);

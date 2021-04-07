@@ -1,6 +1,8 @@
 package com.bysj.imageutil.ui.fragment;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,6 +13,7 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -19,11 +22,20 @@ import android.widget.TextView;
 import com.bysj.imageutil.R;
 import com.bysj.imageutil.adapter.IEnAdapter;
 import com.bysj.imageutil.base.BaseFragment;
+import com.bysj.imageutil.ui.activity.MainActivity;
 import com.bysj.imageutil.ui.components.MyListView;
+import com.bysj.imageutil.util.ActivityManageHelper;
+import com.bysj.imageutil.util.FileUtils;
+import com.bysj.imageutil.util.HandleKeys;
 import com.bysj.imageutil.util.LogCat;
 import com.bysj.imgevaluation.bean.EvaluatBean;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+
+import cc.shinichi.library.ImagePreview;
+import cc.shinichi.library.view.listener.OnDownloadClickListener;
 
 /**
  * 评图Fragment
@@ -44,6 +56,8 @@ public class IEvaluatFragment extends BaseFragment implements View.OnClickListen
     private ArrayList<EvaluatBean> mListSource  = new ArrayList<>();
     /** 增强图片参数列表 */
     private ArrayList<EvaluatBean> mListEnhance = new ArrayList<>();
+    /** 点击查看图片 */
+    private List<String>           uriList      = new ArrayList<>();
     /** 原图 */
     private Bitmap                 sourceBmp    = null;
     /** 显示增强图参数列表的适配器 */
@@ -51,6 +65,11 @@ public class IEvaluatFragment extends BaseFragment implements View.OnClickListen
     private ListView               mListViewE;
     /** 加载框 */
     private LinearLayout           mLytHandle;
+    /** 缓存路径 */
+    private String                 cachePath;
+    /** 评分图片 */
+    private boolean                hasImage;
+
     /**
      * 本页面是否创建完成。
      * 该标志位很重要，当收到来自另一个页面的消息时，
@@ -68,6 +87,24 @@ public class IEvaluatFragment extends BaseFragment implements View.OnClickListen
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void initData() {
+        /*
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+
+            }
+        }).start();*/
+    }
+
+    @Override
+    public boolean isLazyLoad() {
+
+        return true;
     }
 
     @Override
@@ -92,9 +129,6 @@ public class IEvaluatFragment extends BaseFragment implements View.OnClickListen
         mEAdapter   = new IEnAdapter(mListEnhance);
         mListViewE.setAdapter(mEAdapter);
        // mListViewE.setNestedScrollingEnabled(true);
-        /**
-         * 设置点击事件
-         */
 
         return view;
     }
@@ -105,6 +139,55 @@ public class IEvaluatFragment extends BaseFragment implements View.OnClickListen
         super.onViewCreated(view, savedInstanceState);
         onCreated = true;
         refreshImg();
+        /**
+         * 设置点击事件
+         */
+        mListViewE.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                if ( hasImage ) {
+
+                    MainActivity activity = (MainActivity)ActivityManageHelper.getInstance().currentActivity();
+                    ImagePreview.getInstance()
+                            .setContext(activity.getContext())
+                            .setIndex(i)
+                            .setImageList(uriList)
+                            .setShowDownButton(true)
+                            .setShowCloseButton(false)
+                            .setEnableDragClose(true)
+                            .setEnableClickClose(true)
+                            .setDownloadClickListener(new OnDownloadClickListener() {
+
+                                @Override
+                                public void onClick(Activity activity1, View view1, int position) {
+
+                                    FileUtils.saveImageToGallery(activity.getContext(), mListEnhance.get(position).getNewBitmap(), new FileUtils.SaveImageListener() {
+                                        @Override
+                                        public void success(String filePath) {
+
+                                            sendMessage(HandleKeys.SAVE_IMAGE_SUCCESS, filePath);
+                                        }
+
+                                        @Override
+                                        public void failure(String error) {
+
+                                            sendMessage(HandleKeys.SAVE_IMAGE_FAILURE, error);
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public boolean isInterceptDownload() {
+
+                                    return true;
+                                }
+                            })
+                            .start();
+                }
+            }
+        });
+        cachePath = mContext.getCacheDir().getPath() + "/";
     }
 
     @Override
@@ -122,6 +205,18 @@ public class IEvaluatFragment extends BaseFragment implements View.OnClickListen
     @Override
     protected void onHandleMessage(Message msg) {
 
+        int what = msg.what;
+
+        if ( what == HandleKeys.COPY_FILE_SUCCESS ) {
+
+            hasImage = true;
+        } else if ( what == HandleKeys.SAVE_IMAGE_SUCCESS ) {
+
+            myToast(getString(R.string.saved, (String)msg.obj));
+        } else if ( what == HandleKeys.SAVE_IMAGE_FAILURE ) {
+
+            myToast(getString(R.string.toast_save_failed));
+        }
     }
 
     /**
@@ -175,7 +270,6 @@ public class IEvaluatFragment extends BaseFragment implements View.OnClickListen
             mTvParam2.setVisibility(View.GONE);
             mTvParam3.setVisibility(View.GONE);
         }
-
     }
 
     /**
@@ -201,8 +295,38 @@ public class IEvaluatFragment extends BaseFragment implements View.OnClickListen
                     mLytHandle.setVisibility(View.GONE);
                     mListViewE.setVisibility(View.VISIBLE);
                 }
+                hasImage = false;
+                setUriList();
+                refreshImg();
             }
-            refreshImg();
+        }
+    }
+
+    private void setUriList() {
+
+        if ( onCreated ) {
+
+            List<String> list = new ArrayList<>();
+            if (mListEnhance.size() > 0) {
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        uriList.clear();
+                        for (int i = 0; i < 3; ++i) {
+
+                            EvaluatBean evaluatBean = mListEnhance.get(i);
+                            File file = FileUtils.bitmapToFile(evaluatBean.getNewBitmap(), cachePath + System.currentTimeMillis() + ".jpg");
+                            if ( file != null ) {
+
+                                uriList.add(file.getAbsolutePath());
+                            }
+                        }
+                        sendEmptyMessage(HandleKeys.COPY_FILE_SUCCESS);
+                    }
+                }).start();
+            }
         }
     }
 

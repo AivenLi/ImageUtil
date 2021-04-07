@@ -57,6 +57,7 @@
     <string name="share_title">请选择应用</string>
     <string name="crop_is_null">请先裁剪图片</string>
     <string name="param_error">参数错误，无法裁剪</string>
+    <string name="crop_result_title">裁剪结果展示</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

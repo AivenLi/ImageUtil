@@ -19,4 +19,8 @@
         <item name="android:textAllCaps">true</item>
         <item name="android:textSize">18sp</item>
     </style>
+    <style name="DialogShowHideStyle">
+        <item name="android:windowEnterAnimation">@anim/dialog_show</item>
+        <item name="android:windowExitAnimation">@anim/dialog_hide</item>
+    </style>
 </resources>

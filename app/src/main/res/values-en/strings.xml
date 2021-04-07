@@ -56,5 +56,6 @@
     <string name="share_title">Choose an app</string>
     <string name="crop_is_null">Please crop the picture first</string>
     <string name="param_error">Parameter error, unable to crop</string>
+    <string name="crop_result_title">Cropping result display</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

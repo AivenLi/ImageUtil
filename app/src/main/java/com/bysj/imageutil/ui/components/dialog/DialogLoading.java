@@ -42,6 +42,7 @@ public class DialogLoading {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setView(dialogView);
         alertDialog = builder.create();
+        alertDialog.getWindow().setWindowAnimations(R.style.DialogShowHideStyle);
         setCancelable(cancelable);
         Window window = alertDialog.getWindow();
         WindowManager.LayoutParams lp = window.getAttributes();

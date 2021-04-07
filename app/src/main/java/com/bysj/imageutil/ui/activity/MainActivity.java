@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Message;
@@ -145,6 +146,11 @@ public class MainActivity extends BaseActivity implements
     public void startDetectImgParam() {
 
         IEvaluatFragment.startDetectAllParam();
+    }
+
+    public Context getContext() {
+
+        return mContext;
     }
 
     /**

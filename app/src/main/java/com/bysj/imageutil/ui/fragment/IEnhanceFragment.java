@@ -181,7 +181,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
 
         super.onViewCreated(view, savedInstanceState);
         opencv = OpenCVUtil.getInstance();
-        //evaluatUtil = EvaluatUtil.getInstance(mContext);
+        evaluatUtil = EvaluatUtil.getInstance(mContext);
         mDialog = new DialogPrompt(mContext);
         mLoading = new DialogLoading(mContext);
         imgConstantPath = mContext.getCacheDir().getPath() + "/";

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/tab_save"
+        android:title="@string/save_image"
+        android:icon="@mipmap/save_icon" />
+    <item android:id="@+id/tab_share"
+        android:title="@string/share_text"
+        android:icon="@mipmap/share_icon" />
+</menu>
