@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">ImageUtil</string>
+    <string name="app_name">Image evaluation</string>
 
     <string name="grayscale">Grayscale</string>
-    <string name="splash_text_title">Picture enhancement app</string>
+    <string name="splash_text_title">Image quality evaluation system based on Android platform</string>
     <string name="exit_app">Press again to exit the program</string>
     <string name="copyright">Copyright © 2020 – 2021 YourName. All Rights Reserved.</string>
 

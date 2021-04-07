@@ -226,6 +226,7 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
             getImageEva(targetBitmap, false);
             loadImage();
             setBtnAction(useResultImg);
+            myToast("对比度增强功能尚未完成");
         } else if ( what == HandleKeys.SAVE_IMAGE_SUCCESS ) {
 
             if ( isShare ) {
@@ -554,9 +555,11 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
         mRglContrast.setOnValueChangeListener(new RegulatorView.OnValueChangeListener() {
             @Override
             public void onValueChange(float value) {
-
+                /*
                 contrastValue = value;
                 enhanceContrast(contrastValue / 100.0f, false);
+                 */
+                myToast("对比度增强功能尚未完成");
             }
         });
         mRglClarity.setOnValueChangeListener(new RegulatorView.OnValueChangeListener() {

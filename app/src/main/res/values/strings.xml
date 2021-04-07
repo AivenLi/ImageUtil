@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">ImageUtil</string>
+    <string name="app_name">图像评价</string>
 
     <string name="grayscale">灰度处理</string>
-    <string name="splash_text_title">图片增强APP</string>
+    <string name="splash_text_title">基于Android平台的图像质量评价系统</string>
     <string name="exit_app">再按一次退出程序</string>
     <string name="copyright">版权所有 © 2020 – 2021 YourName</string>
 

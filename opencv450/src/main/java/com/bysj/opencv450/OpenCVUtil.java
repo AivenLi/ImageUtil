@@ -61,7 +61,7 @@ public class OpenCVUtil {
                 listener.done(null);
             }
         } else {
-
+            /*
             changeContrastSync(bitmap, new HandleImageListener() {
                 @Override
                 public void done(Bitmap bitmap) {
@@ -73,6 +73,13 @@ public class OpenCVUtil {
                             changeClaritySync(bitmap, listener);
                         }
                     });
+                }
+            });*/
+            changeSaturationSync(bitmap, new HandleImageListener() {
+                @Override
+                public void done(Bitmap bitmap) {
+
+                    changeClaritySync(bitmap, listener);
                 }
             });
         }
