@@ -138,13 +138,13 @@ public class MainActivity extends BaseActivity implements
     @Override
     public void refreshEvaluatFragment(ArrayList<EvaluatBean> evaluatBeans, boolean isSource) {
 
-        IEvaluatFragment.imgChanged(evaluatBeans, isSource);
+        //IEvaluatFragment.imgChanged(evaluatBeans, isSource);
     }
 
     @Override
     public void startDetectImgParam() {
 
-        IEvaluatFragment.startDetectAllParam();
+        //IEvaluatFragment.startDetectAllParam();
     }
 
     /**
