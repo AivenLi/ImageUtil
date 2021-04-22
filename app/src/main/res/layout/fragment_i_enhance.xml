@@ -76,6 +76,7 @@
                     android:gravity="center"
                     android:textSize="@dimen/image_param_edit"
                     android:textColor="@color/add_image_prompt"
+                    android:visibility="gone"
                     />
                 <com.bysj.imageutil.ui.components.RegulatorView
                     android:id="@+id/rgl_contrast"
@@ -97,6 +98,7 @@
                     android:gravity="center"
                     android:textSize="@dimen/image_param_edit"
                     android:textColor="@color/add_image_prompt"
+                    android:visibility="gone"
                     />
                 <com.bysj.imageutil.ui.components.RegulatorView
                     android:id="@+id/rgl_clarity"
@@ -118,6 +120,7 @@
                     android:gravity="center"
                     android:textSize="@dimen/image_param_edit"
                     android:textColor="@color/add_image_prompt"
+                    android:visibility="gone"
                     />
                 <com.bysj.imageutil.ui.components.RegulatorView
                     android:id="@+id/rgl_saturation"
