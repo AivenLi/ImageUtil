@@ -160,11 +160,11 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
         mTvSave          = view.findViewById(R.id.tv_save);
         mTvReduction     = view.findViewById(R.id.tv_reduction);
         mTvShare         = view.findViewById(R.id.tv_share);
-
+/*
         mRglSaturation.setVisibility(View.GONE);
         mRglClarity.setVisibility(View.GONE);
         mRglContrast.setVisibility(View.GONE);
-
+*/
         setShowImage(false);
         initRglRatio();
         setMyViewOnClick();
@@ -465,9 +465,10 @@ public class IEnhanceFragment extends BaseFragment implements View.OnClickListen
             mLytAddImgPrompt.setVisibility(View.GONE);
             loadImage();
         }
+        /*
         mRglSaturation.setVisibility(View.GONE);
         mRglClarity.setVisibility(View.GONE);
-        mRglContrast.setVisibility(View.GONE);
+        mRglContrast.setVisibility(View.GONE);*/
     }
 
     /**
